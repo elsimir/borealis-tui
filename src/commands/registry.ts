@@ -46,6 +46,15 @@ export class CommandRegistry {
     return { status: "ok", command, input };
   }
 
+  dispatchGlobal(raw: string): DispatchResult {
+    const keyword = raw.trim().toLowerCase();
+    const command = this.commands.find((c) => c.global && c.keywords.includes(keyword));
+    if (!command) return { status: "not_found", keyword };
+    if (!command.validate("")) return { status: "invalid", command, input: "" };
+    command.execute("", this.ctx);
+    return { status: "ok", command, input: "" };
+  }
+
   all(): Command[] {
     return [...this.activeCommands()];
   }

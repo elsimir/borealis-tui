@@ -2,6 +2,7 @@ import type { CommandContext } from "./context.js";
 
 export interface Command {
   keywords: string[];
+  name: string;
   description: string;
   global?: boolean;
   help(): string;

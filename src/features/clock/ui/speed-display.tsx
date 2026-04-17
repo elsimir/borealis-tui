@@ -17,7 +17,9 @@ export default function SpeedDisplay({ clock }: Props) {
     });
   }, [clock]);
 
-  const label = state === "paused" ? "Paused" : GameSpeed.label(speed);
+  const label = state === "paused"
+    ? `${GameSpeed.label(speed)} (Paused)`
+    : GameSpeed.label(speed);
 
   return <Text dimColor>{label}</Text>;
 }

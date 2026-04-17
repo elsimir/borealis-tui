@@ -2,16 +2,18 @@ import { SubContextCommand } from "src/commands/sub-context-command.js";
 import type { Command } from "src/commands/command.js";
 import type { GameClock } from "src/engine/GameClock.js";
 import { createSpeedUpCommand, createSpeedDownCommand } from "./speed.js";
+import { createStepCommand } from "./step.js";
 
 export class ClockSubContextCommand extends SubContextCommand {
-  readonly keywords = ["clock", "c"];
-  readonly description = "Enter clock context";
+  readonly keywords = ["c"];
+  readonly description = "Control the game clock";
   readonly name = "Clock";
   readonly subcommands: Command[];
 
   constructor(clock: GameClock) {
     super();
     this.subcommands = [
+      createStepCommand(clock),
       createSpeedUpCommand(clock),
       createSpeedDownCommand(clock),
     ];

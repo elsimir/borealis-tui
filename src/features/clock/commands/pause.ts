@@ -3,8 +3,10 @@ import type { GameClock } from "src/engine/GameClock.js";
 
 export function createPauseCommand(clock: GameClock): Command {
   return {
-    keywords: ["p", "pause"],
-    description: "Toggle pause",
+    keywords: ["p"],
+    name: "Pause",
+    description: "Pause/Unpause the game",
+    global: true,
     help() {
       return "Usage: /pause  —  toggles the game clock pause state";
     },
