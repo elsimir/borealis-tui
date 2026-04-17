@@ -13,6 +13,7 @@ export function createStepCommand(clock: GameClock): Command {
       return true;
     },
     execute(_input, _ctx) {
+      clock.pause();
       clock.step();
     },
   };

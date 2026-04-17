@@ -12,10 +12,8 @@ export function createSpeedUpCommand(clock: GameClock): Command {
     validate() {
       return true;
     },
-    execute(_input, ctx) {
-      const next = GameSpeed.next(clock.getSpeed());
-      clock.setSpeed(next);
-      ctx.output(`Speed: ${GameSpeed.label(next)}`);
+    execute(_input, _ctx) {
+      clock.setSpeed(GameSpeed.next(clock.getSpeed()));
     },
   };
 }
@@ -31,10 +29,8 @@ export function createSpeedDownCommand(clock: GameClock): Command {
     validate() {
       return true;
     },
-    execute(_input, ctx) {
-      const prev = GameSpeed.previous(clock.getSpeed());
-      clock.setSpeed(prev);
-      ctx.output(`Speed: ${GameSpeed.label(prev)}`);
+    execute(_input, _ctx) {
+      clock.setSpeed(GameSpeed.previous(clock.getSpeed()));
     },
   };
 }

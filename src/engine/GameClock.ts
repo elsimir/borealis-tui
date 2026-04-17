@@ -13,7 +13,7 @@ export interface GameClockListener {
 
 export type GameClockState = "stopped" | "running" | "paused";
 
-const BASE_TICK_MS = 2000; // real-time interval between ticks, always fixed at 2 s
+const BASE_TICK_MS = 1000; // real-time interval between ticks, always fixed at 1 s
 
 const SPEED_VALUES = [
   300,        //  5 min
@@ -68,7 +68,7 @@ export const GameSpeed = {
 
   /** Returns the display label for a given speed. */
   label(speed: GameSpeedOption): string {
-    return `${SPEED_LABELS[SPEED_VALUES.indexOf(speed)]} / tick`;
+    return `Time increment: ${SPEED_LABELS[SPEED_VALUES.indexOf(speed)]}`;
   },
 };
 

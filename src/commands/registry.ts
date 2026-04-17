@@ -30,7 +30,10 @@ export class CommandRegistry {
     const [keyword, ...rest] = trimmed.split(/\s+/);
     const input = rest.join(" ");
 
-    const command = this.activeCommands().find((c) =>
+    const candidates = this.ctx.activeSubContext
+      ? this.ctx.activeSubContext.subcommands
+      : this.commands;
+    const command = candidates.find((c) =>
       c.keywords.includes(keyword.toLowerCase())
     );
 

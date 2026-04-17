@@ -7,6 +7,7 @@ import StatusBar from "./status-bar.js";
 import ContextBar from "./context-bar.js";
 import CommandPanel from "./command-panel.js";
 import OutputArea from "./output-area.js";
+import EventsBox, { EVENTS_BOX_TOTAL_HEIGHT } from "./events-box.js";
 import { CommandContext } from "../commands/context.js";
 import { CommandRegistry } from "../commands/registry.js";
 import { createPauseCommand } from "../features/clock/commands/pause.js";
@@ -80,7 +81,8 @@ export default function App() {
   return (
     <Box flexDirection="column" width={columns} height={rows}>
       <Box height={2} />
-      <OutputArea lines={outputLines} columns={columns} rows={gameAreaRows - 2} />
+      <EventsBox columns={columns} />
+      <OutputArea lines={outputLines} columns={columns} rows={gameAreaRows - 2 - EVENTS_BOX_TOTAL_HEIGHT} />
       <ContextBar ctx={ctx} columns={columns} />
       <CommandPanel
         commands={activeCommands}
