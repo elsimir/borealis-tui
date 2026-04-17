@@ -6,6 +6,7 @@ export abstract class SubContextCommand implements Command {
   abstract name: string;
   abstract description: string;
   abstract subcommands: Command[];
+  defaultCommand: Command | null = null;
 
   abstract help(): string;
   abstract validate(input: string): boolean;
@@ -13,6 +14,6 @@ export abstract class SubContextCommand implements Command {
   execute(_input: string, ctx: CommandContext): void {
     if (ctx.hasContext(this)) return;
     ctx.pushContext(this);
-    ctx.output(`Changed context: ${this.name}`);
+    this.defaultCommand?.execute("", ctx);
   }
 }

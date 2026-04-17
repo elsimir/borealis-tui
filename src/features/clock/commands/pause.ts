@@ -13,14 +13,9 @@ export function createPauseCommand(clock: GameClock): Command {
     validate() {
       return true;
     },
-    execute(_input, ctx) {
-      if (clock.getState() === "paused") {
-        clock.resume();
-        ctx.output("Resumed.");
-      } else {
-        clock.pause();
-        ctx.output("Paused.");
-      }
+    execute(_input, _ctx) {
+      if (clock.getState() === "paused") clock.resume();
+      else clock.pause();
     },
   };
 }

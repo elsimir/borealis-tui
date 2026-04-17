@@ -1,11 +1,13 @@
+import { createElement, type ReactNode } from "react";
+import { Text } from "ink";
 import type { SubContextCommand } from "./sub-context-command.js";
 
 export class CommandContext {
   private readonly stack: SubContextCommand[] = [];
-  private readonly outputFn: (text: string) => void;
+  private readonly outputFn: (node: ReactNode) => void;
   private readonly stackListeners: Set<(stack: readonly SubContextCommand[]) => void> = new Set();
 
-  constructor(output: (text: string) => void) {
+  constructor(output: (node: ReactNode) => void) {
     this.outputFn = output;
   }
 
@@ -39,7 +41,11 @@ export class CommandContext {
   }
 
   output(text: string): void {
-    this.outputFn(text);
+    this.outputFn(createElement(Text, null, text));
+  }
+
+  outputReact(node: ReactNode): void {
+    this.outputFn(node);
   }
 
   private notifyStackListeners(): void {

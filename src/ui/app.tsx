@@ -1,23 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Box, useApp, useInput } from "ink";
 import { GameClock, GameSpeed } from "../engine/GameClock.js";
+import { generateGame, PLAYER_ID } from "../engine/generateGame.js";
 import { useDimensions } from "./use-dimensions.js";
 import StatusBar from "./status-bar.js";
 import ContextBar from "./context-bar.js";
 import CommandPanel from "./command-panel.js";
+import OutputArea from "./output-area.js";
 import { CommandContext } from "../commands/context.js";
 import { CommandRegistry } from "../commands/registry.js";
 import { createPauseCommand } from "../features/clock/commands/pause.js";
 import { createClockContext } from "../features/clock/commands/clock-context.js";
+import { createColoniesContext } from "../features/colonies/commands/colonies-context.js";
 
 const STATUS_HEIGHT = 1;
 const CONTEXT_BAR_HEIGHT = 2;
-
 export default function App() {
   const { exit } = useApp();
   const { columns, rows } = useDimensions();
 
   const clock = useMemo(() => new GameClock(GameSpeed.OneDay), []);
+  const world = useMemo(() => generateGame(), []);
+
   useEffect(() => {
     clock.start();
     clock.pause();
@@ -27,7 +31,12 @@ export default function App() {
   const panelHeight = Math.floor(rows / 3);
   const gameAreaRows = rows - panelHeight - STATUS_HEIGHT - CONTEXT_BAR_HEIGHT;
 
-  const ctx = useMemo(() => new CommandContext(() => {}), []);
+  const [outputLines, setOutputLines] = useState<ReactNode[]>([]);
+  const appendOutput = useCallback((node: ReactNode) => {
+    setOutputLines([node]);
+  }, []);
+
+  const ctx = useMemo(() => new CommandContext(appendOutput), [appendOutput]);
   const [, forceUpdate] = useState(0);
   const [globalMode, setGlobalMode] = useState(false);
 
@@ -39,8 +48,12 @@ export default function App() {
   }, [ctx]);
 
   const registry = useMemo(
-    () => new CommandRegistry(ctx).register(createPauseCommand(clock), createClockContext(clock)),
-    [ctx, clock]
+    () => new CommandRegistry(ctx).register(
+      createColoniesContext(world, PLAYER_ID),
+      createPauseCommand(clock),
+      createClockContext(clock),
+    ),
+    [ctx, clock, world]
   );
 
   useInput((input, key) => {
@@ -66,7 +79,8 @@ export default function App() {
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
-      <Box width={columns} height={gameAreaRows} />
+      <Box height={2} />
+      <OutputArea lines={outputLines} columns={columns} rows={gameAreaRows - 2} />
       <ContextBar ctx={ctx} columns={columns} />
       <CommandPanel
         commands={activeCommands}

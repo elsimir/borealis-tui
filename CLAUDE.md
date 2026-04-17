@@ -33,5 +33,7 @@ Each feature mirrors the top-level `ui/`, `commands/`, and `engine/` layout but 
 
 ## Commands
 
-All input is processed as a command — there is no slash prefix. Typing `pause` dispatches the pause command directly. Commands are matched by keyword against the registry.
+All input is processed as a command — there is no slash prefix. Commands are matched by keyword against the registry.
+
+**Keywords must be a single character.** Each command's `keywords` array may contain only one-character strings (e.g. `["l"]`, not `["l", "list"]`).
 

@@ -5,9 +5,9 @@ import { createSpeedUpCommand, createSpeedDownCommand } from "./speed.js";
 import { createStepCommand } from "./step.js";
 
 export class ClockSubContextCommand extends SubContextCommand {
-  readonly keywords = ["c"];
+  readonly keywords = ["t"];
   readonly description = "Control the game clock";
-  readonly name = "Clock";
+  readonly name = "Time";
   readonly subcommands: Command[];
 
   constructor(clock: GameClock) {
@@ -20,7 +20,7 @@ export class ClockSubContextCommand extends SubContextCommand {
   }
 
   help(): string {
-    return "Usage: clock  —  enter the clock context";
+    return "Usage: time  —  enter the time context";
   }
 
   validate(): boolean {
