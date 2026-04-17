@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Text } from "ink";
-import { GameClock } from "../engine/GameClock.js";
+import { GameClock } from "src/engine/GameClock.js";
 
 function midnightToday(): Date {
   const d = new Date();

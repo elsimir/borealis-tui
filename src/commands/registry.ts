@@ -1,4 +1,5 @@
 import type { Command } from "./command.js";
+import type { CommandContext } from "./context.js";
 
 export type DispatchResult =
   | { status: "not_found"; keyword: string }
@@ -7,10 +8,10 @@ export type DispatchResult =
 
 export class CommandRegistry {
   private commands: Command[] = [];
-  private output: (text: string) => void;
+  private ctx: CommandContext;
 
-  constructor(output: (text: string) => void) {
-    this.output = output;
+  constructor(ctx: CommandContext) {
+    this.ctx = ctx;
   }
 
   register(...commands: Command[]): this {
@@ -18,12 +19,18 @@ export class CommandRegistry {
     return this;
   }
 
+  private activeCommands(): Command[] {
+    if (!this.ctx.activeSubContext) return this.commands;
+    const globals = this.commands.filter((c) => c.global);
+    return [...this.ctx.activeSubContext.subcommands, ...globals];
+  }
+
   dispatch(raw: string): DispatchResult {
     const trimmed = raw.trim();
     const [keyword, ...rest] = trimmed.split(/\s+/);
     const input = rest.join(" ");
 
-    const command = this.commands.find((c) =>
+    const command = this.activeCommands().find((c) =>
       c.keywords.includes(keyword.toLowerCase())
     );
 
@@ -35,11 +42,11 @@ export class CommandRegistry {
       return { status: "invalid", command, input };
     }
 
-    command.execute(input, this.output);
+    command.execute(input, this.ctx);
     return { status: "ok", command, input };
   }
 
   all(): Command[] {
-    return [...this.commands];
+    return [...this.activeCommands()];
   }
 }

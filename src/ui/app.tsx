@@ -5,13 +5,17 @@ import { useDimensions } from "./use-dimensions.js";
 import DisplayArea, { Message } from "./display-area.js";
 import InputBar from "./input-bar.js";
 import StatusBar from "./status-bar.js";
+import ContextBar from "./context-bar.js";
+import { CommandContext } from "../commands/context.js";
 import { CommandRegistry } from "../commands/registry.js";
 import { echoCommand } from "../commands/echo.js";
-import { createPauseCommand } from "../commands/pause.js";
+import { createPauseCommand } from "../features/clock/commands/pause.js";
+import { createClockContext } from "../features/clock/commands/clock-context.js";
 
-// Fixed chrome heights (border top+bottom = 2, status = 1)
+// Fixed chrome heights (border top+bottom = 2, status = 1, context bar + top margin = 2)
 const INPUT_HEIGHT = 3;
 const STATUS_HEIGHT = 1;
+const CONTEXT_BAR_HEIGHT = 2;
 
 let nextId = 1;
 
@@ -31,16 +35,19 @@ export default function App() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState("ready");
 
-  const displayRows = rows - INPUT_HEIGHT - STATUS_HEIGHT;
+  const displayRows = rows - INPUT_HEIGHT - STATUS_HEIGHT - CONTEXT_BAR_HEIGHT;
+
+  const ctx = useMemo(
+    () => new CommandContext((text) => {
+      setMessages((prev) => [...prev, addId("assistant", text)]);
+    }),
+    []
+  );
 
   const registry = useMemo(
-    () =>
-      new CommandRegistry((text) => {
-        setMessages((prev) => [...prev, addId("assistant", text)]);
-      }).register(echoCommand, createPauseCommand(clock)),
-    []
+    () => new CommandRegistry(ctx).register(echoCommand, createPauseCommand(clock), createClockContext(clock)),
+    [ctx, clock]
   );
 
   useInput((_input, key) => {
@@ -57,28 +64,29 @@ export default function App() {
     const result = registry.dispatch(trimmed);
 
     if (result.status === "not_found") {
-      setStatus(`Unknown command: /${result.keyword}`);
+      setMessages((prev) => [
+        ...prev,
+        addId("assistant", `Unknown command: ${result.keyword}`),
+      ]);
     } else if (result.status === "invalid") {
       setMessages((prev) => [
         ...prev,
         addId("assistant", result.command.help()),
       ]);
-      setStatus("ready");
-    } else {
-      setStatus("ready");
     }
   }
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
       <DisplayArea messages={messages} columns={columns} rows={displayRows} />
+      <ContextBar ctx={ctx} columns={columns} />
       <InputBar
         value={input}
         onChange={setInput}
         onSubmit={handleSubmit}
         columns={columns}
       />
-      <StatusBar status={status} columns={columns} clock={clock} />
+      <StatusBar columns={columns} clock={clock} />
     </Box>
   );
 }

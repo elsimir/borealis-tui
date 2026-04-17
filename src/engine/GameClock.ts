@@ -78,7 +78,7 @@ export class GameClock {
   private speed: GameSpeedOption;
   private timer: ReturnType<typeof setInterval> | null = null;
   private listeners: Set<GameClockListener> = new Set();
-  private stateListeners: Set<(state: GameClockState) => void> = new Set();
+  private stateListeners: Set<(state: GameClockState, speed: GameSpeedOption) => void> = new Set();
 
   constructor(speed: GameSpeedOption = GameSpeed.OneDay) {
     this.speed = speed;
@@ -86,6 +86,7 @@ export class GameClock {
 
   setSpeed(speed: GameSpeedOption): void {
     this.speed = speed;
+    this.notifyStateListeners();
   }
 
   getSpeed(): GameSpeedOption {
@@ -138,7 +139,7 @@ export class GameClock {
     return () => this.listeners.delete(listener);
   }
 
-  onStateChange(callback: (state: GameClockState) => void): () => void {
+  onStateChange(callback: (state: GameClockState, speed: GameSpeedOption) => void): () => void {
     this.stateListeners.add(callback);
     return () => this.stateListeners.delete(callback);
   }
@@ -158,7 +159,7 @@ export class GameClock {
   }
 
   private notifyStateListeners(): void {
-    for (const cb of this.stateListeners) cb(this.state);
+    for (const cb of this.stateListeners) cb(this.state, this.speed);
   }
 
   private startTimer(): void {

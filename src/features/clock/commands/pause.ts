@@ -1,5 +1,5 @@
-import type { Command } from "./command.js";
-import type { GameClock } from "../engine/GameClock.js";
+import type { Command } from "src/commands/command.js";
+import type { GameClock } from "src/engine/GameClock.js";
 
 export function createPauseCommand(clock: GameClock): Command {
   return {
@@ -11,13 +11,13 @@ export function createPauseCommand(clock: GameClock): Command {
     validate() {
       return true;
     },
-    execute(_input, output) {
+    execute(_input, ctx) {
       if (clock.getState() === "paused") {
         clock.resume();
-        output("Resumed.");
+        ctx.output("Resumed.");
       } else {
         clock.pause();
-        output("Paused.");
+        ctx.output("Paused.");
       }
     },
   };

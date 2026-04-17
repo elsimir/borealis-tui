@@ -9,7 +9,7 @@ export const echoCommand: Command = {
   validate(input) {
     return input.trim().length > 0;
   },
-  execute(input, output) {
-    output(input.trim());
+  execute(input, ctx) {
+    ctx.output(input.trim());
   },
 };
