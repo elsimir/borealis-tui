@@ -2,13 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Box, Text, useInput } from "ink";
 import type { Command } from "../commands/command.js";
 import { interactionColor } from "./colors.js";
+import { useDimensions } from "./use-dimensions.js";
 
 interface Props {
   commands: Command[];
   contextName?: string;
-  globalMode?: boolean;
-  height: number;
-  columns: number;
   canGoBack: boolean;
 }
 
@@ -18,16 +16,12 @@ const COLUMN_GAP = 2;
 const ROW_GAP = 1;
 const BACK_HEIGHT = 2;
 const DESC_WIDTH = COLUMN_WIDTH - KEY_WIDTH;
-const HEADING_HEIGHT = 2;
 
-type Item =
-  | { type: "command"; cmd: Command; isGlobal: boolean }
-  | { type: "heading"; label: string };
+type Item = { type: "command"; cmd: Command };
 
 function itemHeight(item: Item): number {
-  if (item.type === "heading") return HEADING_HEIGHT;
   const descLines = Math.ceil(item.cmd.description.length / DESC_WIDTH);
-  return 1 + Math.max(1, descLines) + 1; // name + desc + marginBottom
+  return 1 + Math.max(1, descLines) + 1;
 }
 
 function paginate(items: Item[], colHeight: number, maxCols: number): Item[][][] {
@@ -46,13 +40,9 @@ function paginate(items: Item[], colHeight: number, maxCols: number): Item[][][]
     }
   }
 
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]!;
+  for (const item of items) {
     const h = itemHeight(item);
-    const guardH = item.type === "heading" && i + 1 < items.length
-      ? h + itemHeight(items[i + 1]!)
-      : h;
-    if (used + guardH > colHeight && used > 0) nextCol();
+    if (used + h > colHeight && used > 0) nextCol();
     col.push(item);
     used += h;
   }
@@ -72,11 +62,11 @@ function PageIndicator({ page, pageCount }: { page: number; pageCount: number })
   );
 }
 
-function CommandRow({ cmd, keyColor }: { cmd: Command; keyColor: string }) {
+function CommandRow({ cmd }: { cmd: Command }) {
   return (
     <Box flexDirection="row" marginBottom={1} width={COLUMN_WIDTH} paddingRight={COLUMN_GAP}>
       <Box width={KEY_WIDTH} alignSelf="flex-start">
-        <Text color={keyColor} bold>{cmd.keywords[0]}</Text>
+        <Text color={interactionColor} bold>{cmd.trigger}</Text>
       </Box>
       <Box flexDirection="column" width={DESC_WIDTH}>
         <Text bold>{cmd.name}</Text>
@@ -86,47 +76,10 @@ function CommandRow({ cmd, keyColor }: { cmd: Command; keyColor: string }) {
   );
 }
 
-function GlobalCommandRow({ cmd, globalMode }: { cmd: Command; globalMode: boolean }) {
-  return (
-    <Box flexDirection="row" marginBottom={1} width={COLUMN_WIDTH} paddingRight={COLUMN_GAP}>
-      <Box width={KEY_WIDTH} alignSelf="flex-start">
-        {globalMode
-          ? <Text color={interactionColor} bold>{cmd.keywords[0]}</Text>
-          : <Text><Text color={interactionColor} bold>g+</Text><Text color="gray">{cmd.keywords[0]}</Text></Text>
-        }
-      </Box>
-      <Box flexDirection="column" width={DESC_WIDTH}>
-        <Text bold>{cmd.name}</Text>
-        <Text dimColor wrap="wrap">{cmd.description}</Text>
-      </Box>
-    </Box>
-  );
-}
-
-function renderItem(item: Item, globalMode: boolean, contextKeyColor: string) {
-  if (item.type === "heading") {
-    return (
-      <Box key="heading-global" marginBottom={1}>
-        <Text color={globalMode ? "cyan" : undefined} dimColor={!globalMode}>Global</Text>
-      </Box>
-    );
-  }
-  if (item.isGlobal) {
-    return <GlobalCommandRow key={item.cmd.keywords[0]} cmd={item.cmd} globalMode={globalMode} />;
-  }
-  return <CommandRow key={item.cmd.keywords[0]} cmd={item.cmd} keyColor={contextKeyColor} />;
-}
-
-export default function CommandPanel({ commands, contextName, globalMode = false, height, columns, canGoBack }: Props) {
-  const contextCmds = contextName ? commands.filter((c) => !c.global) : commands;
-  const globalCmds = contextName ? commands.filter((c) => c.global) : [];
-
-  const items: Item[] = [
-    ...contextCmds.map((cmd) => ({ type: "command" as const, cmd, isGlobal: false })),
-    ...(globalCmds.length > 0
-      ? [{ type: "heading" as const, label: "Global" }, ...globalCmds.map((cmd) => ({ type: "command" as const, cmd, isGlobal: true }))]
-      : []),
-  ];
+export default function CommandPanel({ commands, contextName, canGoBack }: Props) {
+  const { columns, rows } = useDimensions();
+  const height = Math.floor(rows / 3);
+  const items: Item[] = commands.map((cmd) => ({ type: "command", cmd }));
 
   const innerHeight = height - 2;
   const commandsHeight = canGoBack ? innerHeight - BACK_HEIGHT : innerHeight;
@@ -147,14 +100,13 @@ export default function CommandPanel({ commands, contextName, globalMode = false
 
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
   const pageItems = pages[safePage] ?? [];
-  const contextKeyColor = globalMode ? "gray" : interactionColor;
 
   return (
     <Box width={columns} height={height} flexDirection="column">
       <Text color="cyan">{"─".repeat(columns)}</Text>
       <Box flexDirection="column" height={innerHeight} paddingX={1}>
         <Box flexDirection="column" flexWrap="wrap" height={commandsHeight} paddingTop={ROW_GAP} paddingBottom={ROW_GAP}>
-          {pageItems.flat().map((item) => renderItem(item, globalMode, contextKeyColor))}
+          {pageItems.flat().map((item) => <CommandRow key={item.cmd.trigger} cmd={item.cmd} />)}
         </Box>
         {canGoBack && (
           <Box flexDirection="row">
@@ -164,7 +116,7 @@ export default function CommandPanel({ commands, contextName, globalMode = false
             </Box>
             <Box flexDirection="column" flexGrow={1}>
               <Text bold>Back</Text>
-              <Text dimColor>Return to previous context</Text>
+              <Text dimColor>Return to previous screen</Text>
             </Box>
             <PageIndicator page={safePage} pageCount={pageCount} />
           </Box>

@@ -27,6 +27,10 @@ src/
 
 Each feature mirrors the top-level `ui/`, `commands/`, and `engine/` layout but is scoped to its own domain. Features import from `src/engine/` and `src/commands/` for shared infrastructure; they do not import from each other or from `src/ui/`.
 
+### UI conventions
+
+Screen components (e.g. `ColoniesScreen`) are responsible for fetching and organising data from game state, then passing it down as props to presentational components. Presentational components receive plain data as props and do not access context or game state directly.
+
 ### Features
 
 - **clock** — game clock display and pause control (`ui/clock.tsx`, `ui/speed-display.tsx`, `commands/pause.ts`)

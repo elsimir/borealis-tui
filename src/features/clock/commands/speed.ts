@@ -1,35 +1,24 @@
 import type { Command } from "src/commands/command.js";
-import { GameClock, GameSpeed } from "src/engine/GameClock.js";
+import type { GameState } from "src/engine/GameState.js";
+import { GameSpeed } from "src/engine/GameClock.js";
 
-export function createSpeedUpCommand(clock: GameClock): Command {
+export function createSpeedUpCommand({ clock }: GameState): Command {
   return {
-    keywords: ["u"],
+    trigger: "u",
     name: "Faster",
     description: "Increase clock speed",
-    help() {
-      return "Usage: u  —  increase the game clock speed";
-    },
-    validate() {
-      return true;
-    },
-    execute(_input, _ctx) {
+    execute() {
       clock.setSpeed(GameSpeed.next(clock.getSpeed()));
     },
   };
 }
 
-export function createSpeedDownCommand(clock: GameClock): Command {
+export function createSpeedDownCommand({ clock }: GameState): Command {
   return {
-    keywords: ["d"],
+    trigger: "d",
     name: "Slower",
     description: "Decrease clock speed",
-    help() {
-      return "Usage: d  —  decrease the game clock speed";
-    },
-    validate() {
-      return true;
-    },
-    execute(_input, _ctx) {
+    execute() {
       clock.setSpeed(GameSpeed.previous(clock.getSpeed()));
     },
   };

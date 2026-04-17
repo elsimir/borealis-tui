@@ -1,11 +1,14 @@
-import type { CommandContext } from "./context.js";
+import type { ReactNode } from "react";
+
+export interface CommandResult {
+  output?: ReactNode;
+  dialog?: (onClose: () => void) => ReactNode;
+  nextScreen?: ReactNode;
+}
 
 export interface Command {
-  keywords: string[];
+  trigger: string;
   name: string;
   description: string;
-  global?: boolean;
-  help(): string;
-  validate(input: string): boolean;
-  execute(input: string, ctx: CommandContext): void;
+  execute(input: string): CommandResult | undefined;
 }

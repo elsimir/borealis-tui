@@ -1,27 +1,24 @@
 import React, { type ReactNode } from "react";
 import { Box } from "ink";
+import { useDimensions } from "./use-dimensions.js";
 
 interface OutputAreaProps {
-  lines: ReactNode[];
-  columns: number;
-  rows: number;
+  children?: ReactNode;
 }
 
-export default function OutputArea({ lines, columns, rows }: OutputAreaProps) {
-  const visible = lines.slice(-rows);
+export default function OutputArea({ children }: OutputAreaProps) {
+  const { columns } = useDimensions();
 
   return (
     <Box
       flexDirection="column"
       justifyContent="flex-start"
       width={columns}
-      height={rows}
+      flexGrow={1}
       paddingX={1}
       overflow="hidden"
     >
-      {visible.map((node, i) => (
-        <Box key={i}>{node}</Box>
-      ))}
+      {children}
     </Box>
   );
 }

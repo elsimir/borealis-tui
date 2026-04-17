@@ -31,6 +31,8 @@ src/
 
 Each feature mirrors the top-level directory layout but is scoped to its own domain. Features import from `src/engine/` and `src/commands/` for shared infrastructure; they do not import from each other or from `src/ui/`.
 
+**UI conventions:** Screen components are responsible for fetching and organising data from game state, then passing it down as props to presentational components. Presentational components receive plain data as props and do not access context or game state directly.
+
 | Feature | Description |
 |---------|-------------|
 | `clock` | Game clock display and pause control |
