@@ -12,7 +12,13 @@ function PauseControl() {
   const [state, setState] = useState<GameClockState>(clock.getState());
   useEffect(() => clock.onStateChange((s) => setState(s)), [clock]);
   const action = state === "paused" ? "unpause" : "pause";
-  return <Text>Press <Text color={interactionColor}>p</Text> to {action}</Text>;
+  return (
+    <Text>
+      Press <Text color={interactionColor}>p</Text> to {action}
+      {"  "}
+      <Text color={interactionColor}>t</Text> for time controls
+    </Text>
+  );
 }
 
 export default function StatusBar() {

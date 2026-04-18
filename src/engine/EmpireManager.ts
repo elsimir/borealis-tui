@@ -14,8 +14,4 @@ export class EmpireManager {
   all(): Empire[] {
     return Array.from(this.empires.values());
   }
-
-  player(): Empire | undefined {
-    return this.all().find((e) => e.isPlayer);
-  }
 }

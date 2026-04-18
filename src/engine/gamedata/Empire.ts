@@ -5,10 +5,11 @@ export function empireId(id: string): EmpireId {
 }
 
 export class Empire {
+  isPlayer: boolean = false;
+
   constructor(
     readonly id: EmpireId,
     readonly name: string,
-    readonly isPlayer: boolean,
     readonly color: string,
   ) {}
 }

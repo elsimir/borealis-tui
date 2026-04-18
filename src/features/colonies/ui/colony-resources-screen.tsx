@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Text } from "ink";
 import Screen from "src/ui/screen.js";
 import { useGameState } from "src/ui/game-state-context.js";
 import { useProductionCycle } from "src/ui/use-production-cycle.js";
+import { createSelectColonyCommand } from "../commands/select.js";
+import { useSelectedColony } from "./selected-colony-context.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { PlanetResources } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
@@ -109,14 +111,22 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
   );
 }
 
-export default function ColonyResourcesScreen({ colony }: { colony: Colony }) {
+export default function ColonyResourcesScreen() {
   useProductionCycle();
-  const { world, data } = useGameState();
-  const planet = world.systems.getPlanet(colony.planetId);
-  const rows = buildRows(colony, planet?.resources ?? {}, data);
+  const gameState = useGameState();
+  const { world, data } = gameState;
+  const { colony, setColony } = useSelectedColony();
+  const planet = colony ? world.systems.getPlanet(colony.planetId) : undefined;
+  const rows = colony ? buildRows(colony, planet?.resources ?? {}, data) : [];
+
+  const commands = useMemo(() => [
+    createSelectColonyCommand(gameState, setColony),
+  ], [gameState, setColony]);
+
+  if (!colony) return null;
 
   return (
-    <Screen commands={[]} context={["Colonies", colony.name, "Resources"]}>
+    <Screen commands={commands} context={["Colonies", colony.name, "Resources"]}>
       <ResourceTable rows={rows} />
     </Screen>
   );

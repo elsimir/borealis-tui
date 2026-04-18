@@ -10,6 +10,8 @@ import EventsBox from "./events-box.js";
 import { ScreenContext } from "./screen-context.js";
 import { SharedInputProvider } from "./shared-input.js";
 import { GameStateContext } from "./game-state-context.js";
+import TimeControlDialog from "../features/clock/ui/time-control-dialog.js";
+import { SelectedColonyProvider } from "../features/colonies/ui/selected-colony-context.js";
 
 export default function App({ data, logger }: { data: GameData; logger: Logger }) {
   const { exit } = useApp();
@@ -26,7 +28,10 @@ export default function App({ data, logger }: { data: GameData; logger: Logger }
     };
   }, [gameState]);
 
+  const [showTimeDialog, setShowTimeDialog] = useState(false);
+
   useInput((input) => {
+    if (input === "t") setShowTimeDialog((prev) => !prev);
     if (input === "p") {
       if (gameState.clock.getState() === "paused") gameState.clock.resume();
       else gameState.clock.pause();
@@ -39,6 +44,10 @@ export default function App({ data, logger }: { data: GameData; logger: Logger }
     setScreens((prev) => [...prev, screen]);
   }, []);
 
+  const replaceScreen = useCallback((screen: ReactNode) => {
+    setScreens((prev) => [...prev.slice(0, -1), screen]);
+  }, []);
+
   const popScreen = useCallback(() => {
     setScreens((prev) => {
       if (prev.length <= 1) { exit(); return prev; }
@@ -48,16 +57,19 @@ export default function App({ data, logger }: { data: GameData; logger: Logger }
 
   return (
     <GameStateContext.Provider value={gameState}>
+      <SelectedColonyProvider>
       <SharedInputProvider>
-        <ScreenContext.Provider value={{ setScreen, popScreen }}>
+        <ScreenContext.Provider value={{ setScreen, replaceScreen, popScreen }}>
           <Box flexDirection="column" width={columns} height={rows}>
             <Box height={2} />
             <EventsBox />
             {screens[screens.length - 1]}
             <StatusBar />
+            {showTimeDialog && <TimeControlDialog />}
           </Box>
         </ScreenContext.Provider>
       </SharedInputProvider>
+      </SelectedColonyProvider>
     </GameStateContext.Provider>
   );
 }

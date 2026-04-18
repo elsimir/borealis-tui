@@ -6,6 +6,7 @@ import { useGameState } from "src/ui/game-state-context.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { GameWorld } from "src/engine/GameWorld.js";
 import { createSelectColonyCommand } from "../commands/select.js";
+import { useSelectedColony } from "./selected-colony-context.js";
 import ColonyDetailsScreen from "./colony-details-screen.js";
 
 function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] }) {
@@ -44,13 +45,14 @@ function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] 
 export default function ColoniesScreen() {
   const gameState = useGameState();
   const { setScreen } = useSetScreen();
+  const { setColony } = useSelectedColony();
 
   const commands = useMemo(() => [
-    createSelectColonyCommand(gameState, (colony) => setScreen(<ColonyDetailsScreen colony={colony} />)),
-  ], [gameState, setScreen]);
+    createSelectColonyCommand(gameState, (colony) => { setColony(colony); setScreen(<ColonyDetailsScreen />); }),
+  ], [gameState, setScreen, setColony]);
 
-  const { world, playerId } = gameState;
-  const colonies = world.colonies.forEmpire(playerId);
+  const { world } = gameState;
+  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
 
   return (
     <Screen commands={commands} context={["Colonies"]}>

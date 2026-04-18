@@ -5,7 +5,7 @@ import type { Colony } from "src/engine/gamedata/Colony.js";
 import SelectColonyDialog from "../ui/select-colony-dialog.js";
 
 export function createSelectColonyCommand(
-  { world, playerId }: GameState,
+  { world }: GameState,
   onSelect: (colony: Colony) => void,
 ): Command {
   return {
@@ -13,7 +13,7 @@ export function createSelectColonyCommand(
     name: "Select",
     description: "Select a colony",
     execute(): CommandResult {
-      const colonies = world.colonies.forEmpire(playerId);
+      const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
       return {
         dialog: (onClose) => <SelectColonyDialog colonies={colonies} onDone={onSelect} onClose={onClose} />,
       };
