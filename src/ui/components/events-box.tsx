@@ -4,8 +4,6 @@ import { useDimensions } from "../hooks/use-dimensions.js";
 
 const EVENTS_HEIGHT = 10;
 
-export const EVENTS_BOX_TOTAL_HEIGHT = EVENTS_HEIGHT + 1;
-
 export default function EventsBox() {
   const { columns } = useDimensions();
   return (

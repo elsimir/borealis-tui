@@ -4,6 +4,7 @@ import Screen from "src/ui/components/screen.js";
 import { useGameState } from "src/ui/components/game-state-context.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { GameWorld } from "src/engine/GameWorld.js";
+import type { SystemId } from "src/engine/gamedata/StarSystem.js";
 import { createSelectColonyCommand } from "../commands/select.js";
 import ColonyDetailsScreen from "./colony-details-screen.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
@@ -11,7 +12,7 @@ import SelectColonyDialog from "./select-colony-dialog.js";
 function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] }) {
   if (colonies.length === 0) return <Text dimColor>No colonies.</Text>;
 
-  const systemMap = new Map<string, Colony[]>();
+  const systemMap = new Map<SystemId, Colony[]>();
   for (const colony of colonies) {
     const arr = systemMap.get(colony.systemId) ?? [];
     arr.push(colony);
@@ -19,7 +20,7 @@ function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] 
   }
 
   const groups = Array.from(systemMap.entries()).map(([sId, cols]) => ({
-    system: world.systems.get(sId as Parameters<typeof world.systems.get>[0]),
+    system: world.systems.get(sId),
     colonies: cols,
   }));
 

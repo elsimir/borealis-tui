@@ -6,21 +6,9 @@ import { useProductionCycle } from "src/ui/hooks/use-production-cycle.js";
 import { createSelectColonyCommand } from "../commands/select.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
-import type { BodyResources } from "src/engine/gamedata/StarSystem.js";
+import type { Body } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
-
-function calcMiningPerYear(
-  installations: Record<string, number>,
-  data: GameData,
-  accessibility: number,
-): number {
-  let miningPointsPerYear = 0;
-  for (const inst of data.installations.miningInstallations()) {
-    const count = installations[inst.id] ?? 0;
-    miningPointsPerYear += inst.output["mining_points"]! * count;
-  }
-  return Math.round(miningPointsPerYear * accessibility);
-}
+import { predictYearlyMining } from "../../engine/production.js";
 
 interface ResourceRow {
   name: string;
@@ -31,16 +19,15 @@ interface ResourceRow {
   stockpileDelta: number;
 }
 
-function buildRows(colony: Colony, bodyResources: BodyResources, data: GameData): ResourceRow[] {
+function buildRows(colony: Colony, body: Body, data: GameData): ResourceRow[] {
+  const yearlyMining = predictYearlyMining(colony, body, data);
   return data.resources.mineable().map((resource) => {
-    const deposit = bodyResources[resource.id] ?? { amount: 0, accessibility: 0 };
+    const deposit = body.resources[resource.id] ?? { amount: 0, accessibility: 0 };
     return {
       name: resource.name,
       bodyAmount: deposit.amount,
       accessibility: deposit.accessibility,
-      miningPerYear: deposit.accessibility > 0
-        ? calcMiningPerYear(colony.installations, data, deposit.accessibility)
-        : 0,
+      miningPerYear: yearlyMining[resource.id] ?? 0,
       stockpile: colony.stockpile[resource.id] ?? 0,
       stockpileDelta: colony.stockpileDelta[resource.id] ?? 0,
     };
@@ -110,7 +97,7 @@ export default function ColonyResourcesScreen({ colony, setColony, onBack }: Pro
 
   const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
   const body = world.systems.getBody(colony.bodyId);
-  const rows = buildRows(colony, body.resources, data);
+  const rows = buildRows(colony, body, data);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),

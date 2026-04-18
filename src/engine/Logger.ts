@@ -30,7 +30,7 @@ function pruneOldLogs(logDir: string): void {
     })
     .sort((a, b) => b.mtime - a.mtime);
 
-  for (const { p } of files.slice(MAX_LOG_FILES - 1)) {
+  for (const { p } of files.slice(MAX_LOG_FILES)) {
     fs.unlinkSync(p);
   }
 }

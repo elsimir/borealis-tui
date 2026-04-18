@@ -17,7 +17,7 @@ export class ColonyTickListener implements GameClockListener {
       const body = this.world.systems.getBody(colony.bodyId);
 
       for (let i = 0; i < productionSteps; i++) {
-        const result = runColonyProduction(colony, body, this.data, 0);
+        const result = runColonyProduction(colony, body, this.data);
         applyProductionResult(colony, result);
       }
     }

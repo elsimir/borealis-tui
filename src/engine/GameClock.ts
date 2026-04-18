@@ -45,10 +45,10 @@ const SPEED_LABELS = [
   "30 Days",
 ] as const;
 
-/** In-game seconds elapsed per tick (tick fires every BASE_TICK_MS = 2 s). */
+/** In-game seconds elapsed per tick (tick fires every BASE_TICK_MS = 1 s). */
 export type GameSpeedOption = typeof SPEED_VALUES[number];
 
-/** In-game seconds elapsed per tick. Each tick fires every BASE_TICK_MS (2 s). */
+/** In-game seconds elapsed per tick. Each tick fires every BASE_TICK_MS (1 s). */
 export const GameSpeed = {
   FiveMinutes:   SPEED_VALUES[0],
   ThirtyMinutes: SPEED_VALUES[1],

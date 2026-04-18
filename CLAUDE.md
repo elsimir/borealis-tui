@@ -53,7 +53,7 @@ The build copies `data/` into `dist/data/` alongside the compiled binary. When a
 
 ## Commands
 
-All input is processed as a command — there is no slash prefix. Commands are matched by keyword against the registry.
+All input is processed as a command — there is no slash prefix. Commands are matched by their `trigger` against the registry.
 
-**Keywords must be a single character.** Each command's `keywords` array may contain only one-character strings (e.g. `["l"]`, not `["l", "list"]`).
+**`trigger` must be a single character** (e.g. `"l"`, not `"list"`).
 

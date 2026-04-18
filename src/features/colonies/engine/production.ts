@@ -4,7 +4,8 @@ import type { GameData } from "src/engine/GameData.js";
 import { PRODUCTION_STEP_SECONDS } from "src/engine/GameClock.js";
 
 const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
-const STEP_FRACTION = PRODUCTION_STEP_SECONDS / SECONDS_PER_YEAR; // 5/365
+const STEP_FRACTION = PRODUCTION_STEP_SECONDS / SECONDS_PER_YEAR;
+export const STEPS_PER_YEAR = SECONDS_PER_YEAR / PRODUCTION_STEP_SECONDS;
 
 export interface ProductionResult {
   stockpileDelta: Record<string, number>;
@@ -14,7 +15,6 @@ export function runColonyProduction(
   colony: Colony,
   body: Body,
   data: GameData,
-  elapsedSeconds: number,
 ): ProductionResult {
   const delta: Record<string, number> = {};
 
@@ -38,6 +38,13 @@ export function runColonyProduction(
   }
 
   return { stockpileDelta: delta };
+}
+
+export function predictYearlyMining(colony: Colony, body: Body, data: GameData): Record<string, number> {
+  const result = runColonyProduction(colony, body, data);
+  return Object.fromEntries(
+    Object.entries(result.stockpileDelta).map(([id, perStep]) => [id, Math.round(perStep * STEPS_PER_YEAR)])
+  );
 }
 
 export function applyProductionResult(colony: Colony, result: ProductionResult): void {
