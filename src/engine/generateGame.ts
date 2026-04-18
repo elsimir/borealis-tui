@@ -1,77 +1,61 @@
 import { GameWorld } from "src/engine/GameWorld.js";
-import { empireId } from "src/engine/gamedata/Empire.js";
-import { systemId, planetId } from "src/engine/gamedata/StarSystem.js";
+import { Empire, empireId } from "src/engine/gamedata/Empire.js";
 import { colonyId } from "src/engine/gamedata/Colony.js";
+import type { GameData } from "src/engine/GameData.js";
 
 export const PLAYER_ID = empireId("player");
 
-export function generateGame(): GameWorld {
-  const world = new GameWorld();
+export function generateGame(data: GameData): GameWorld {
+  const world = new GameWorld(data);
+  const { resources } = data;
 
-  world.addEmpire({
-    id: PLAYER_ID,
-    name: "Player Empire",
-    isPlayer: true,
-    color: "#00AAFF",
-  });
+  world.empires.add(new Empire(PLAYER_ID, "Player Empire", true, "#00AAFF"));
 
-  const earth = { id: planetId("earth"), name: "Earth", type: "oceanic" as const };
-  const mars = { id: planetId("mars"), name: "Mars", type: "arid" as const };
+  const sol = world.systems.generateSol();
 
-  world.addSystem({
-    id: systemId("sol"),
-    name: "Sol",
-    x: 0,
-    y: 0,
-    starType: "yellow",
-    planets: [earth, mars],
-    connections: [],
-  });
+  world.revealSystem(PLAYER_ID, sol.id, "surveyed", 0);
 
-  world.revealSystem(PLAYER_ID, systemId("sol"), "surveyed", 0);
-
-  world.addColony({
+  world.colonies.add({
     id: colonyId("earth"),
     name: "Earth",
     empireId: PLAYER_ID,
-    systemId: systemId("sol"),
-    planetId: earth.id,
+    systemId: sol.id,
+    planetId: sol.planets[0].id,
     population: 8_000_000_000,
     foundedAt: 0,
+    installations: { mine: 3 },
+    stockpile: Object.fromEntries(resources.map((r) => [r.id, 1000])),
+    stockpileDelta: {},
   });
 
-  world.addColony({
+  world.colonies.add({
     id: colonyId("mars"),
     name: "Mars",
     empireId: PLAYER_ID,
-    systemId: systemId("sol"),
-    planetId: mars.id,
+    systemId: sol.id,
+    planetId: sol.planets[1].id,
     population: 1_200_000,
     foundedAt: 0,
+    installations: {},
+    stockpile: {},
+    stockpileDelta: {},
   });
 
-  const proximaB = { id: planetId("proxima-b"), name: "Proxima b", type: "arid" as const };
+  const nearby = world.systems.generate({ connections: [sol.id] });
 
-  world.addSystem({
-    id: systemId("alpha-centauri"),
-    name: "Alpha Centauri",
-    x: 4,
-    y: 2,
-    starType: "yellow",
-    planets: [proximaB],
-    connections: [systemId("sol")],
-  });
+  world.revealSystem(PLAYER_ID, nearby.id, "surveyed", 0);
 
-  world.revealSystem(PLAYER_ID, systemId("alpha-centauri"), "surveyed", 0);
-
-  world.addColony({
-    id: colonyId("proxima-b"),
-    name: "Proxima b",
+  world.colonies.add({
+    id: colonyId("nearby-colony"),
+    name: `${nearby.planets[0].name} Colony`,
     empireId: PLAYER_ID,
-    systemId: systemId("alpha-centauri"),
-    planetId: proximaB.id,
+    systemId: nearby.id,
+    planetId: nearby.planets[0].id,
     population: 2_400_000,
     foundedAt: 0,
+    installations: {},
+    stockpile: {},
+    stockpileDelta: {},
   });
 
   return world;

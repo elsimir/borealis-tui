@@ -1,5 +1,10 @@
 import React from "react";
 import { render } from "ink";
 import App from "./ui/app.js";
+import { Logger } from "./engine/Logger.js";
+import { GameDataLoader } from "./data/GameDataLoader.js";
 
-render(<App />, { fullscreen: true });
+const logger = new Logger();
+const gameData = await new GameDataLoader(logger).load();
+
+render(<App data={gameData} logger={logger} />);

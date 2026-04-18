@@ -19,7 +19,7 @@ function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] 
   }
 
   const groups = Array.from(systemMap.entries()).flatMap(([sId, cols]) => {
-    const system = world.getSystem(sId as Parameters<typeof world.getSystem>[0]);
+    const system = world.systems.get(sId as Parameters<typeof world.systems.get>[0]);
     return system ? [{ system, colonies: cols }] : [];
   });
 
@@ -50,7 +50,7 @@ export default function ColoniesScreen() {
   ], [gameState, setScreen]);
 
   const { world, playerId } = gameState;
-  const colonies = world.getColoniesForEmpire(playerId);
+  const colonies = world.colonies.forEmpire(playerId);
 
   return (
     <Screen commands={commands} context={["Colonies"]}>

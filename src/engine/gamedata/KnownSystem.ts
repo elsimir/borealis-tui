@@ -1,5 +1,5 @@
-import type { EmpireId } from "src/engine/Empire";
-import type { SystemId } from "src/engine/StarSystem";
+import type { EmpireId } from "./Empire.js";
+import type { SystemId } from "./StarSystem.js";
 
 export type SurveyLevel =
   | "detected"   // position known

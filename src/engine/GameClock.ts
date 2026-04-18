@@ -1,3 +1,6 @@
+/** In-game seconds per production step (5 game-days). */
+export const PRODUCTION_STEP_SECONDS = 5 * 24 * 60 * 60;
+
 /**
  * A listener registered with the GameClock.
  *
@@ -5,10 +8,15 @@
  * non-null value, the smallest returned value becomes the executeTime for that
  * tick (clamping it earlier than the full tick). `execute` is then called on
  * every listener with the final executeTime.
+ *
+ * `productionSteps` is the number of full production steps (each = PRODUCTION_STEP_SECONDS)
+ * that completed in this tick based on accumulated game time since the last step.
+ * For `needsInterrupt` it is computed from the full tick; for `execute` it reflects
+ * the actual (possibly clamped) elapsed time.
  */
 export interface GameClockListener {
-  needsInterrupt(elapsedSeconds: number, speed: GameSpeedOption): number | null;
-  execute(elapsedSeconds: number): void;
+  needsInterrupt(elapsedSeconds: number, speed: GameSpeedOption, productionSteps: number): number | null;
+  execute(elapsedSeconds: number, productionSteps: number): void;
 }
 
 export type GameClockState = "stopped" | "running" | "paused";
@@ -74,6 +82,7 @@ export const GameSpeed = {
 
 export class GameClock {
   private elapsedSeconds: number = 0;
+  private secondsSinceLastProduction: number = 0;
   private state: GameClockState = "stopped";
   private speed: GameSpeedOption;
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -145,16 +154,26 @@ export class GameClock {
   }
 
   private advance(): void {
+    const prevElapsed = this.elapsedSeconds;
     this.elapsedSeconds += this.speed;
+
+    const speculativeSteps = Math.floor(
+      (this.secondsSinceLastProduction + this.speed) / PRODUCTION_STEP_SECONDS,
+    );
 
     let executeTime = this.elapsedSeconds;
     for (const listener of this.listeners) {
-      const eventAt = listener.needsInterrupt(this.elapsedSeconds, this.speed);
+      const eventAt = listener.needsInterrupt(this.elapsedSeconds, this.speed, speculativeSteps);
       if (eventAt !== null && eventAt < executeTime) executeTime = eventAt;
     }
 
+    const tickSeconds = executeTime - prevElapsed;
+    this.secondsSinceLastProduction += tickSeconds;
+    const productionSteps = Math.floor(this.secondsSinceLastProduction / PRODUCTION_STEP_SECONDS);
+    this.secondsSinceLastProduction -= productionSteps * PRODUCTION_STEP_SECONDS;
+
     for (const listener of this.listeners) {
-      listener.execute(executeTime);
+      listener.execute(executeTime, productionSteps);
     }
   }
 

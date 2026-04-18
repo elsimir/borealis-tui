@@ -1,7 +1,10 @@
-import type { Empire, EmpireId } from "src/engine/gamedata/Empire";
-import type { StarSystem, SystemId } from "src/engine/gamedata/StarSystem";
-import type { Colony, ColonyId } from "src/engine/gamedata/Colony";
+import type { EmpireId } from "src/engine/gamedata/Empire";
+import type { SystemId } from "src/engine/gamedata/StarSystem";
 import type { KnownSystem, SurveyLevel } from "src/engine/gamedata/KnownSystem";
+import type { GameData } from "./GameData.js";
+import { ColonyManager } from "./ColonyManager.js";
+import { EmpireManager } from "./EmpireManager.js";
+import { SystemManager } from "./SystemManager.js";
 
 type KnownSystemKey = `${EmpireId}:${SystemId}`;
 
@@ -10,50 +13,14 @@ function knownSystemKey(empireId: EmpireId, systemId: SystemId): KnownSystemKey 
 }
 
 export class GameWorld {
-  private empires = new Map<EmpireId, Empire>();
-  private systems = new Map<SystemId, StarSystem>();
-  private colonies = new Map<ColonyId, Colony>();
+  readonly empires = new EmpireManager();
+  readonly systems: SystemManager;
+  readonly colonies = new ColonyManager();
+
+  constructor(data: GameData) {
+    this.systems = new SystemManager(data);
+  }
   private knownSystems = new Map<KnownSystemKey, KnownSystem>();
-
-  addEmpire(empire: Empire): void {
-    this.empires.set(empire.id, empire);
-  }
-
-  getEmpire(id: EmpireId): Empire | undefined {
-    return this.empires.get(id);
-  }
-
-  getEmpires(): Empire[] {
-    return Array.from(this.empires.values());
-  }
-
-  getPlayerEmpire(): Empire | undefined {
-    return this.getEmpires().find((e) => e.isPlayer);
-  }
-
-  addSystem(system: StarSystem): void {
-    this.systems.set(system.id, system);
-  }
-
-  getSystem(id: SystemId): StarSystem | undefined {
-    return this.systems.get(id);
-  }
-
-  getSystems(): StarSystem[] {
-    return Array.from(this.systems.values());
-  }
-
-  addColony(colony: Colony): void {
-    this.colonies.set(colony.id, colony);
-  }
-
-  getColony(id: ColonyId): Colony | undefined {
-    return this.colonies.get(id);
-  }
-
-  getColoniesForEmpire(empireId: EmpireId): Colony[] {
-    return Array.from(this.colonies.values()).filter((c) => c.empireId === empireId);
-  }
 
   revealSystem(
     empireId: EmpireId,

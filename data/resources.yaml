@@ -1,0 +1,42 @@
+# Resource definitions. Modders can add entries or override by id.
+- id: water
+  name: Water
+  description: Essential solvent and coolant, abundant on temperate worlds.
+  base_value: 1
+  mineable: true
+  rarity: common
+
+- id: volatiles
+  name: Volatiles
+  description: Combustible gases and organic compounds used as fuel and feedstock.
+  base_value: 2
+  mineable: true
+  rarity: common
+
+- id: light_metals
+  name: Light Metals
+  description: Aluminium, titanium, and similar low-density structural metals.
+  base_value: 2
+  mineable: true
+  rarity: uncommon
+
+- id: heavy_metals
+  name: Heavy Metals
+  description: Iron, copper, and dense industrial metals used in heavy construction.
+  base_value: 3
+  mineable: true
+  rarity: rare
+
+- id: noble_metals
+  name: Noble Metals
+  description: Rare corrosion-resistant metals prized for electronics and trade.
+  base_value: 8
+  mineable: true
+  rarity: rare
+
+- id: fissiles
+  name: Fissiles
+  description: Radioactive materials used in reactors and advanced weapons.
+  base_value: 12
+  mineable: true
+  rarity: uncommon

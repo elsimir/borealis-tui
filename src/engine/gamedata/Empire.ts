@@ -4,9 +4,11 @@ export function empireId(id: string): EmpireId {
   return id as EmpireId;
 }
 
-export interface Empire {
-  id: EmpireId;
-  name: string;
-  isPlayer: boolean;
-  color: string;
+export class Empire {
+  constructor(
+    readonly id: EmpireId,
+    readonly name: string,
+    readonly isPlayer: boolean,
+    readonly color: string,
+  ) {}
 }

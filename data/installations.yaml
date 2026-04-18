@@ -1,0 +1,34 @@
+# Installation definitions.
+# All output values are expressed as yearly rates. The engine scales them to
+# the production step duration (5 days = 5/365 of a year) at runtime.
+- id: mine
+  name: Mine
+  description: Extracts raw minerals from the planet surface.
+  cost:
+    build_points: 30
+    resources:
+      heavy_metals: 10
+  output:
+    mining_points: 5
+
+- id: factory
+  name: Factory
+  description: Heavy industry complex that accelerates construction.
+  cost:
+    build_points: 30
+    resources:
+      heavy_metals: 20
+      light_metals: 10
+  output:
+    build_points: 3
+
+- id: research_lab
+  name: Research Lab
+  description: Scientific facility that generates research breakthroughs.
+  cost:
+    build_points: 100
+    resources:
+      light_metals: 15
+      noble_metals: 5
+  output:
+    research: 2

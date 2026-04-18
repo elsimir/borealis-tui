@@ -7,8 +7,8 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "noEmit": true,
+    "types": ["node"],
     "paths": {
       "src/*": ["./src/*"]
     }

@@ -5,10 +5,18 @@ A terminal-based strategy/simulation game built with Ink (React for terminals) a
 ## Build & verify
 
 ```
-npm run build
+bun run typecheck   # fast type check, no emit
+bun run build       # typecheck + compile to dist/borealis
+bun run dev         # run directly from source (no compile step)
 ```
 
-Runs TypeScript compilation and bundling. Run this to verify changes.
+The project uses Bun as runtime and bundler. `bun run dev` runs TypeScript source directly. `bun run build` produces a single self-contained executable at `dist/borealis` via `bun build --compile`.
+
+Type checking (`tsc --noEmit`) is a separate step from running — Bun strips types without checking them.
+
+### Build: react-devtools-core / ws stubs
+
+`shims/react-devtools-core` and `shims/ws` are local stub packages registered in `devDependencies`. Ink's reconciler contains a dynamic `import('./devtools.js')` guarded by `process.env.DEV === 'true'`, but Bun statically traces dynamic imports and tries to bundle `devtools.js`, which has static imports of `react-devtools-core` and `ws` (neither is a real dependency). The stubs satisfy the bundler; the devtools code path is never reached at runtime since `DEV` is not set. Do not remove these from `devDependencies`.
 
 ## Structure
 
@@ -34,6 +42,14 @@ Screen components (e.g. `ColoniesScreen`) are responsible for fetching and organ
 ### Features
 
 - **clock** — game clock display and pause control (`ui/clock.tsx`, `ui/speed-display.tsx`, `commands/pause.ts`)
+
+## Data files
+
+Game data lives in `data/` as YAML files and is loaded at startup via `src/data/GameDataLoader.ts`. Schemas are defined with Zod in `src/data/schemas/`.
+
+**All YAML keys use `snake_case`** — this applies to field names in data files and to string keys used as identifiers within maps (e.g. resource IDs, output keys). TypeScript schema fields mirror this exactly; do not use camelCase in schemas or data files.
+
+The build copies `data/` into `dist/data/` alongside the compiled binary. When adding a new data file, register it in `GameDataLoader` and add it to `GameData`.
 
 ## Commands
 

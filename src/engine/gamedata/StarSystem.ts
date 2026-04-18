@@ -13,17 +13,23 @@ export function planetId(id: string): PlanetId {
   return id as PlanetId;
 }
 
+export interface PlanetResource {
+  amount: number;
+  accessibility: number;
+}
+
+export type PlanetResources = Record<string, PlanetResource>;
+
 export interface Planet {
   id: PlanetId;
   name: string;
   type: PlanetType;
+  resources: PlanetResources;
 }
 
 export interface StarSystem {
   id: SystemId;
   name: string;
-  x: number;
-  y: number;
   starType: StarType;
   planets: Planet[];
   connections: SystemId[];

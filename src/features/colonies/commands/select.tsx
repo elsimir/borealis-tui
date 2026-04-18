@@ -13,7 +13,7 @@ export function createSelectColonyCommand(
     name: "Select",
     description: "Select a colony",
     execute(): CommandResult {
-      const colonies = world.getColoniesForEmpire(playerId);
+      const colonies = world.colonies.forEmpire(playerId);
       return {
         dialog: (onClose) => <SelectColonyDialog colonies={colonies} onDone={onSelect} onClose={onClose} />,
       };

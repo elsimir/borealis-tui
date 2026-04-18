@@ -28,7 +28,7 @@ export default function Clock({ clock }: Props) {
   useEffect(() => {
     return clock.addListener({
       needsInterrupt: () => null,
-      execute(elapsedSeconds) {
+      execute(elapsedSeconds, _productionSteps) {
         const next = format(new Date(midnight.getTime() + elapsedSeconds * 1000));
         setDisplay(prev => prev === next ? prev : next);
       },
