@@ -4,7 +4,6 @@ import OutputArea from "./output-area.js";
 import ContextBar from "./context-bar.js";
 import CommandPanel from "./command-panel.js";
 import type { Command } from "../../commands/command.js";
-import { useSetScreen } from "./screen-context.js";
 
 interface ScreenProps {
   commands: Command[];
@@ -14,12 +13,10 @@ interface ScreenProps {
 }
 
 export default function Screen({ commands, context = [], onBack, children }: ScreenProps) {
-  const { popScreen } = useSetScreen();
-
   useSharedInput((input, key) => {
     const isBack = key.escape || (input === "b" && !key.ctrl && !key.meta);
     if (isBack) {
-      onBack ? onBack() : popScreen();
+      onBack?.();
       return true;
     }
 

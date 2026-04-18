@@ -1,14 +1,22 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Screen from "./screen.js";
-import { useSetScreen } from "./screen-context.js";
-import { listColonies } from "../../features/colonies/commands/colonies-context.js";
+import ColoniesScreen from "../../features/colonies/ui/components/colonies-screen.js";
 
-export default function MainScreen() {
-  const { setScreen } = useSetScreen();
+export default function MainScreen({ onBack }: { onBack: () => void }) {
+  const [showColonies, setShowColonies] = useState(false);
 
   const commands = useMemo(() => [
-    listColonies(setScreen),
-  ], [setScreen]);
+    {
+      trigger: "c",
+      name: "Colonies",
+      description: "Manage your colonies",
+      onDispatch: () => setShowColonies(true),
+    },
+  ], []);
 
-  return <Screen commands={commands} />;
+  if (showColonies) {
+    return <ColoniesScreen onBack={() => setShowColonies(false)} />;
+  }
+
+  return <Screen commands={commands} onBack={onBack} />;
 }

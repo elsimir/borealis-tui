@@ -1,10 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Box, Text } from "ink";
 import Screen from "src/ui/components/screen.js";
-import { useSetScreen } from "src/ui/components/screen-context.js";
 import { useGameState } from "src/ui/components/game-state-context.js";
-import { createSelectColonyCommand } from "../../commands/select.js";
-import { useSelectedColony } from "./selected-colony-context.js";
+import { createSelectColonyCommand } from "../commands/select.js";
 import ColonyResourcesScreen from "./colony-resources-screen.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
@@ -44,10 +42,15 @@ function InstallationList({ colony, data }: { colony: Colony; data: GameData }) 
   );
 }
 
-export default function ColonyDetailsScreen() {
-  const { setScreen } = useSetScreen();
+interface Props {
+  colony: Colony;
+  setColony: (colony: Colony) => void;
+  onBack: () => void;
+}
+
+export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props) {
   const gameState = useGameState();
-  const { colony, setColony } = useSelectedColony();
+  const [showResources, setShowResources] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
 
   const { world } = gameState;
@@ -58,16 +61,24 @@ export default function ColonyDetailsScreen() {
       trigger: "r",
       name: "Resources",
       description: "View planet resources and stockpile",
-      onDispatch: () => setScreen(<ColonyResourcesScreen />),
+      onDispatch: () => setShowResources(true),
     },
     createSelectColonyCommand(() => setSelectOpen(true)),
-  ], [setScreen]);
+  ], []);
 
-  if (!colony) return null;
+  if (showResources) {
+    return (
+      <ColonyResourcesScreen
+        colony={colony}
+        setColony={setColony}
+        onBack={() => setShowResources(false)}
+      />
+    );
+  }
 
   return (
     <>
-      <Screen commands={commands} context={["Colonies", colony.name]}>
+      <Screen commands={commands} context={["Colonies", colony.name]} onBack={onBack}>
         <Box gap={4}>
           <ColonyInfo colony={colony} />
           <InstallationList colony={colony} data={gameState.data} />

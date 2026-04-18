@@ -3,12 +3,12 @@ import { Box, Text } from "ink";
 import Screen from "src/ui/components/screen.js";
 import { useGameState } from "src/ui/components/game-state-context.js";
 import { useProductionCycle } from "src/ui/hooks/use-production-cycle.js";
-import { createSelectColonyCommand } from "../../commands/select.js";
-import { useSelectedColony } from "./selected-colony-context.js";
+import { createSelectColonyCommand } from "../commands/select.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { PlanetResources } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
+
 function calcMiningPerYear(
   installations: Record<string, number>,
   data: GameData,
@@ -32,11 +32,7 @@ interface ResourceRow {
   stockpileDelta: number;
 }
 
-function buildRows(
-  colony: Colony,
-  planetResources: PlanetResources,
-  data: GameData,
-): ResourceRow[] {
+function buildRows(colony: Colony, planetResources: PlanetResources, data: GameData): ResourceRow[] {
   return data.resources.filter((r) => r.mineable).map((resource) => {
     const planet = planetResources[resource.id] ?? { amount: 0, accessibility: 0 };
     return {
@@ -52,9 +48,7 @@ function buildRows(
   });
 }
 
-function fmt(n: number): string {
-  return n.toLocaleString();
-}
+function fmt(n: number): string { return n.toLocaleString(); }
 
 function fmtDelta(n: number): string {
   if (n === 0) return "—";
@@ -72,28 +66,20 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
     return s.length >= w ? s.slice(0, w) : " ".repeat(w - s.length) + s;
   }
 
-  const header = (
-    <Box>
-      <Text bold>{pad("Resource", colWidths.name)}</Text>
-      <Text bold>{padL("Planet Amt", colWidths.amount)}</Text>
-      <Text bold>{padL("Access", colWidths.access)}</Text>
-      <Text bold>{padL("Mining/yr", colWidths.mining)}</Text>
-      <Text bold>{padL("Stockpile", colWidths.stockpile)}</Text>
-      <Text bold>{padL("Δ/tick", colWidths.delta)}</Text>
-    </Box>
-  );
-
-  const divider = (
-    <Text dimColor>{"─".repeat(
-      colWidths.name + colWidths.amount + colWidths.access +
-      colWidths.mining + colWidths.stockpile + colWidths.delta
-    )}</Text>
-  );
-
   return (
     <Box flexDirection="column">
-      {header}
-      {divider}
+      <Box>
+        <Text bold>{pad("Resource", colWidths.name)}</Text>
+        <Text bold>{padL("Planet Amt", colWidths.amount)}</Text>
+        <Text bold>{padL("Access", colWidths.access)}</Text>
+        <Text bold>{padL("Mining/yr", colWidths.mining)}</Text>
+        <Text bold>{padL("Stockpile", colWidths.stockpile)}</Text>
+        <Text bold>{padL("Δ/tick", colWidths.delta)}</Text>
+      </Box>
+      <Text dimColor>{"─".repeat(
+        colWidths.name + colWidths.amount + colWidths.access +
+        colWidths.mining + colWidths.stockpile + colWidths.delta
+      )}</Text>
       {rows.map((row) => (
         <Box key={row.name}>
           <Text>{pad(row.name, colWidths.name)}</Text>
@@ -112,26 +98,28 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
   );
 }
 
-export default function ColonyResourcesScreen() {
+interface Props {
+  colony: Colony;
+  setColony: (colony: Colony) => void;
+  onBack: () => void;
+}
+
+export default function ColonyResourcesScreen({ colony, setColony, onBack }: Props) {
   useProductionCycle();
-  const gameState = useGameState();
-  const { world, data } = gameState;
-  const { colony, setColony } = useSelectedColony();
+  const { world, data } = useGameState();
   const [selectOpen, setSelectOpen] = useState(false);
 
   const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
-  const planet = colony ? world.systems.getPlanet(colony.planetId) : undefined;
-  const rows = colony ? buildRows(colony, planet?.resources ?? {}, data) : [];
+  const planet = world.systems.getPlanet(colony.planetId);
+  const rows = buildRows(colony, planet?.resources ?? {}, data);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),
   ], []);
 
-  if (!colony) return null;
-
   return (
     <>
-      <Screen commands={commands} context={["Colonies", colony.name, "Resources"]}>
+      <Screen commands={commands} context={["Colonies", colony.name, "Resources"]} onBack={onBack}>
         <ResourceTable rows={rows} />
       </Screen>
       {selectOpen && (
