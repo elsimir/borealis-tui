@@ -1,4 +1,4 @@
-import type { PlanetResources } from "src/engine/gamedata/StarSystem.js";
+import type { BodyResources } from "src/engine/gamedata/StarSystem.js";
 import type { Resource, ResourceRarity } from "src/data/schemas/resource.js";
 
 const ZERO_CHANCE = 0.5;
@@ -13,11 +13,11 @@ const RARITY_POWER: Record<ResourceRarity, number> = {
   rare:     4.0,
 };
 
-export function generatePlanetResources(
+export function generateBodyResources(
   resources: readonly Resource[],
   homeworld: boolean,
-): PlanetResources {
-  const result: PlanetResources = {};
+): BodyResources {
+  const result: BodyResources = {};
 
   for (const resource of resources) {
     if (!resource.mineable) continue;

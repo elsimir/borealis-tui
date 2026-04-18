@@ -14,11 +14,10 @@ export class ColonyTickListener implements GameClockListener {
     if (productionSteps === 0) return;
 
     for (const colony of this.world.colonies.all()) {
-      const planet = this.world.systems.getPlanet(colony.planetId);
-      if (!planet) continue;
+      const body = this.world.systems.getBody(colony.bodyId);
 
       for (let i = 0; i < productionSteps; i++) {
-        const result = runColonyProduction(colony, planet, this.data, 0);
+        const result = runColonyProduction(colony, body, this.data, 0);
         applyProductionResult(colony, result);
       }
     }

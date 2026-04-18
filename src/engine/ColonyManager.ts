@@ -8,8 +8,10 @@ export class ColonyManager {
     this.colonies.push(colony);
   }
 
-  get(id: ColonyId): Colony | undefined {
-    return this.colonies.find((c) => c.id === id);
+  get(id: ColonyId): Colony {
+    const colony = this.colonies.find((c) => c.id === id);
+    if (!colony) throw new Error(`Colony not found: ${id}`);
+    return colony;
   }
 
   all(): Colony[] {

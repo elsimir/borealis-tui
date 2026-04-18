@@ -54,13 +54,13 @@ export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props
   const [selectOpen, setSelectOpen] = useState(false);
 
   const { world } = gameState;
-  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
+  const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
 
   const commands = useMemo(() => [
     {
       trigger: "r",
       name: "Resources",
-      description: "View planet resources and stockpile",
+      description: "View body resources and stockpile",
       onDispatch: () => setShowResources(true),
     },
     createSelectColonyCommand(() => setSelectOpen(true)),

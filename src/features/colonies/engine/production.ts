@@ -1,5 +1,5 @@
 import type { Colony } from "src/engine/gamedata/Colony.js";
-import type { Planet } from "src/engine/gamedata/StarSystem.js";
+import type { Body } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
 import { PRODUCTION_STEP_SECONDS } from "src/engine/GameClock.js";
 
@@ -12,7 +12,7 @@ export interface ProductionResult {
 
 export function runColonyProduction(
   colony: Colony,
-  planet: Planet,
+  body: Body,
   data: GameData,
   elapsedSeconds: number,
 ): ProductionResult {
@@ -28,7 +28,7 @@ export function runColonyProduction(
         // mining_points drives mineral extraction per resource, not a direct stockpile output
         for (const resource of data.resources) {
           if (!resource.mineable) continue;
-          const deposit = planet.resources[resource.id];
+          const deposit = body.resources[resource.id];
           if (!deposit || deposit.accessibility <= 0) continue;
           delta[resource.id] = (delta[resource.id] ?? 0) + outputPerStep * count * deposit.accessibility;
         }

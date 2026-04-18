@@ -18,10 +18,10 @@ function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] 
     systemMap.set(colony.systemId, arr);
   }
 
-  const groups = Array.from(systemMap.entries()).flatMap(([sId, cols]) => {
-    const system = world.systems.get(sId as Parameters<typeof world.systems.get>[0]);
-    return system ? [{ system, colonies: cols }] : [];
-  });
+  const groups = Array.from(systemMap.entries()).map(([sId, cols]) => ({
+    system: world.systems.get(sId as Parameters<typeof world.systems.get>[0]),
+    colonies: cols,
+  }));
 
   return (
     <Box flexDirection="column">
@@ -46,7 +46,7 @@ export default function ColoniesScreen({ onBack }: { onBack: () => void }) {
   const [selectedColony, setSelectedColony] = useState<Colony | null>(null);
   const [selectOpen, setSelectOpen] = useState(false);
 
-  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
+  const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),

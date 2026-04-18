@@ -5,32 +5,33 @@ export function systemId(id: string): SystemId {
 }
 
 export type StarType = "yellow" | "red_dwarf" | "blue_giant" | "white_dwarf" | "neutron";
-export type PlanetType = "rocky" | "oceanic" | "arid" | "arctic" | "gas_giant" | "barren";
+export type BodyType = "rocky" | "oceanic" | "arid" | "arctic" | "gas_giant" | "barren";
 
-export type PlanetId = string & { readonly _brand: "PlanetId" };
+export type BodyId = string & { readonly _brand: "BodyId" };
 
-export function planetId(id: string): PlanetId {
-  return id as PlanetId;
+export function bodyId(id: string): BodyId {
+  return id as BodyId;
 }
 
-export interface PlanetResource {
+export interface BodyResource {
   amount: number;
   accessibility: number;
 }
 
-export type PlanetResources = Record<string, PlanetResource>;
+export type BodyResources = Record<string, BodyResource>;
 
-export interface Planet {
-  id: PlanetId;
+export interface Body {
+  type: "planet";
+  id: BodyId;
   name: string;
-  type: PlanetType;
-  resources: PlanetResources;
+  bodyType: BodyType;
+  resources: BodyResources;
 }
 
 export interface StarSystem {
   id: SystemId;
   name: string;
   starType: StarType;
-  planets: Planet[];
+  bodies: Body[];
   connections: SystemId[];
 }

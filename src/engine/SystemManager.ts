@@ -1,11 +1,11 @@
-import type { Planet, PlanetId, PlanetType, StarSystem, StarType, SystemId } from "./gamedata/StarSystem.js";
+import type { Body, BodyId, BodyType, StarSystem, StarType, SystemId } from "./gamedata/StarSystem.js";
 import type { GameData } from "./GameData.js";
-import { planetId, systemId } from "./gamedata/StarSystem.js";
-import { generatePlanetResources } from "./generatePlanetResources.js";
+import { bodyId, systemId } from "./gamedata/StarSystem.js";
+import { generateBodyResources } from "./generateBodyResources.js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-const PLANET_TYPES: PlanetType[] = ["rocky", "oceanic", "arid", "arctic", "gas_giant", "barren"];
+const BODY_TYPES: BodyType[] = ["rocky", "oceanic", "arid", "arctic", "gas_giant", "barren"];
 const STAR_TYPES: StarType[] = ["yellow", "red_dwarf", "blue_giant", "white_dwarf", "neutron"];
 
 const STAR_NAMES = [
@@ -14,17 +14,17 @@ const STAR_NAMES = [
   "Aldebaran", "Fomalhaut", "Capella", "Pollux", "Castor",
 ];
 
-const MIN_PLANETS = 0;
-const MAX_PLANETS = 15;
+const MIN_BODIES = 0;
+const MAX_BODIES = 15;
 
-interface PlanetSpec {
-  type: PlanetType;
+interface BodySpec {
+  bodyType: BodyType;
   homeworld?: boolean;
 }
 
 export interface GenerateSystemParams {
   connections?: SystemId[];
-  minimumPlanetCount?: number;
+  minimumBodyCount?: number;
 }
 
 export class SystemManager {
@@ -37,14 +37,32 @@ export class SystemManager {
     this.systems.set(system.id, system);
   }
 
+  get(id: SystemId): StarSystem {
+    const system = this.systems.get(id);
+    if (!system) throw new Error(`System not found: ${id}`);
+    return system;
+  }
+
+  all(): StarSystem[] {
+    return Array.from(this.systems.values());
+  }
+
+  getBody(id: BodyId): Body {
+    for (const system of this.systems.values()) {
+      const body = system.bodies.find((b) => b.id === id);
+      if (body) return body;
+    }
+    throw new Error(`Body not found: ${id}`);
+  }
+
   generate(params: GenerateSystemParams = {}): StarSystem {
-    const { connections = [], minimumPlanetCount = MIN_PLANETS } = params;
+    const { connections = [], minimumBodyCount = MIN_BODIES } = params;
     const name = this.pickName();
     const id = systemId(name.toLowerCase().replace(/ /g, "-"));
     const starType = STAR_TYPES[Math.floor(Math.random() * STAR_TYPES.length)];
-    const count = minimumPlanetCount + Math.floor(Math.random() * (MAX_PLANETS - minimumPlanetCount + 1));
-    const specs: PlanetSpec[] = Array.from({ length: count }, () => ({
-      type: PLANET_TYPES[Math.floor(Math.random() * PLANET_TYPES.length)],
+    const count = minimumBodyCount + Math.floor(Math.random() * (MAX_BODIES - minimumBodyCount + 1));
+    const specs: BodySpec[] = Array.from({ length: count }, () => ({
+      bodyType: BODY_TYPES[Math.floor(Math.random() * BODY_TYPES.length)],
     }));
     return this.createSystem(id, name, starType, connections, specs);
   }
@@ -52,24 +70,8 @@ export class SystemManager {
   generateSol(): StarSystem {
     return this.createSystem(
       systemId("sol"), "Sol", "yellow", [],
-      [{ type: "oceanic", homeworld: true }, { type: "arid" }],
+      [{ bodyType: "oceanic", homeworld: true }, { bodyType: "arid" }],
     );
-  }
-
-  get(id: SystemId): StarSystem | undefined {
-    return this.systems.get(id);
-  }
-
-  all(): StarSystem[] {
-    return Array.from(this.systems.values());
-  }
-
-  getPlanet(id: PlanetId): Planet | undefined {
-    for (const system of this.systems.values()) {
-      const planet = system.planets.find((p) => p.id === id);
-      if (planet) return planet;
-    }
-    return undefined;
   }
 
   private createSystem(
@@ -77,22 +79,23 @@ export class SystemManager {
     name: string,
     starType: StarType,
     connections: SystemId[],
-    specs: PlanetSpec[],
+    specs: BodySpec[],
   ): StarSystem {
-    const planets = this.createPlanets(id, name, specs);
-    const system: StarSystem = { id, name, starType, planets, connections };
+    const bodies = this.createBodies(id, name, specs);
+    const system: StarSystem = { id, name, starType, bodies, connections };
     this.systems.set(id, system);
     return system;
   }
 
-  private createPlanets(sysId: SystemId, sysName: string, specs: PlanetSpec[]): Planet[] {
+  private createBodies(sysId: SystemId, sysName: string, specs: BodySpec[]): Body[] {
     return specs.map((spec, i) => {
       const letter = LETTERS[i + 1];
       return {
-        id: planetId(`${sysId}-${letter.toLowerCase()}`),
+        type: "planet" as const,
+        id: bodyId(`${sysId}-${letter.toLowerCase()}`),
         name: `${sysName} ${letter}`,
-        type: spec.type,
-        resources: generatePlanetResources(this.data.resources, spec.homeworld ?? false),
+        bodyType: spec.bodyType,
+        resources: generateBodyResources(this.data.resources, spec.homeworld ?? false),
       };
     });
   }

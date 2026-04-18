@@ -17,7 +17,7 @@ export class GameWorld {
   readonly systems: SystemManager;
   readonly colonies = new ColonyManager();
   readonly playerEmpireIds: EmpireId[] = [];
-  currentPlayerEmpireId: EmpireId | null = null;
+  private currentPlayerEmpireId: EmpireId | null = null;
   private knownSystems = new Map<KnownSystemKey, KnownSystem>();
 
   constructor(data: GameData) {
@@ -31,8 +31,8 @@ export class GameWorld {
     if (this.currentPlayerEmpireId === null) this.currentPlayerEmpireId = empire.id;
   }
 
-  getPlayerEmpire(): Empire | undefined {
-    if (this.currentPlayerEmpireId === null) return undefined;
+  getCurrentPlayerEmpire(): Empire {
+    if (this.currentPlayerEmpireId === null) throw new Error("No player empire set");
     return this.empires.get(this.currentPlayerEmpireId);
   }
 

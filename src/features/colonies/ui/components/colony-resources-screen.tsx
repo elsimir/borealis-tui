@@ -6,7 +6,7 @@ import { useProductionCycle } from "src/ui/hooks/use-production-cycle.js";
 import { createSelectColonyCommand } from "../commands/select.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
-import type { PlanetResources } from "src/engine/gamedata/StarSystem.js";
+import type { BodyResources } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
 
 function calcMiningPerYear(
@@ -25,22 +25,22 @@ function calcMiningPerYear(
 
 interface ResourceRow {
   name: string;
-  planetAmount: number;
+  bodyAmount: number;
   accessibility: number;
   miningPerYear: number;
   stockpile: number;
   stockpileDelta: number;
 }
 
-function buildRows(colony: Colony, planetResources: PlanetResources, data: GameData): ResourceRow[] {
+function buildRows(colony: Colony, bodyResources: BodyResources, data: GameData): ResourceRow[] {
   return data.resources.filter((r) => r.mineable).map((resource) => {
-    const planet = planetResources[resource.id] ?? { amount: 0, accessibility: 0 };
+    const deposit = bodyResources[resource.id] ?? { amount: 0, accessibility: 0 };
     return {
       name: resource.name,
-      planetAmount: planet.amount,
-      accessibility: planet.accessibility,
-      miningPerYear: planet.accessibility > 0
-        ? calcMiningPerYear(colony.installations, data, planet.accessibility)
+      bodyAmount: deposit.amount,
+      accessibility: deposit.accessibility,
+      miningPerYear: deposit.accessibility > 0
+        ? calcMiningPerYear(colony.installations, data, deposit.accessibility)
         : 0,
       stockpile: colony.stockpile[resource.id] ?? 0,
       stockpileDelta: colony.stockpileDelta[resource.id] ?? 0,
@@ -70,7 +70,7 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
     <Box flexDirection="column">
       <Box>
         <Text bold>{pad("Resource", colWidths.name)}</Text>
-        <Text bold>{padL("Planet Amt", colWidths.amount)}</Text>
+        <Text bold>{padL("Body Amt", colWidths.amount)}</Text>
         <Text bold>{padL("Access", colWidths.access)}</Text>
         <Text bold>{padL("Mining/yr", colWidths.mining)}</Text>
         <Text bold>{padL("Stockpile", colWidths.stockpile)}</Text>
@@ -83,7 +83,7 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
       {rows.map((row) => (
         <Box key={row.name}>
           <Text>{pad(row.name, colWidths.name)}</Text>
-          <Text>{padL(fmt(row.planetAmount), colWidths.amount)}</Text>
+          <Text>{padL(fmt(row.bodyAmount), colWidths.amount)}</Text>
           <Text>{padL(row.accessibility.toFixed(2), colWidths.access)}</Text>
           <Text color={row.miningPerYear > 0 ? "green" : undefined}>
             {padL(row.miningPerYear > 0 ? fmt(row.miningPerYear) : "—", colWidths.mining)}
@@ -109,9 +109,9 @@ export default function ColonyResourcesScreen({ colony, setColony, onBack }: Pro
   const { world, data } = useGameState();
   const [selectOpen, setSelectOpen] = useState(false);
 
-  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
-  const planet = world.systems.getPlanet(colony.planetId);
-  const rows = buildRows(colony, planet?.resources ?? {}, data);
+  const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
+  const body = world.systems.getBody(colony.bodyId);
+  const rows = buildRows(colony, body.resources, data);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),

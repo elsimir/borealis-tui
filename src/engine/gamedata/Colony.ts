@@ -1,5 +1,5 @@
 import type { EmpireId } from "./Empire.js";
-import type { PlanetId, SystemId } from "./StarSystem.js";
+import type { BodyId, SystemId } from "./StarSystem.js";
 
 export type ColonyId = string & { readonly _brand: "ColonyId" };
 
@@ -14,7 +14,7 @@ export interface Colony {
   name: string;
   empireId: EmpireId;
   systemId: SystemId;
-  planetId: PlanetId;
+  bodyId: BodyId;
   population: number;
   foundedAt: number;
   installations: Record<string, number>;
