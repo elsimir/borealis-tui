@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { GameState } from "../engine/GameState.js";
+import type { GameState } from "../../engine/GameState.js";
 
 export const GameStateContext = createContext<GameState | null>(null);
 

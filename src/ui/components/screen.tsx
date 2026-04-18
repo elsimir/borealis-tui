@@ -1,22 +1,20 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useSharedInput } from "./shared-input.js";
 import OutputArea from "./output-area.js";
 import ContextBar from "./context-bar.js";
 import CommandPanel from "./command-panel.js";
-import type { Command, CommandResult } from "../commands/command.js";
+import type { Command } from "../../commands/command.js";
 import { useSetScreen } from "./screen-context.js";
 
 interface ScreenProps {
   commands: Command[];
   context?: string[];
   onBack?: () => void;
-  onCommand?: (command: Command, result: CommandResult) => void;
   children?: ReactNode;
 }
 
-export default function Screen({ commands, context = [], onBack, onCommand, children }: ScreenProps) {
-  const { popScreen, setScreen } = useSetScreen();
-  const [dialog, setDialog] = useState<ReactNode>(null);
+export default function Screen({ commands, context = [], onBack, children }: ScreenProps) {
+  const { popScreen } = useSetScreen();
 
   useSharedInput((input, key) => {
     const isBack = key.escape || (input === "b" && !key.ctrl && !key.meta);
@@ -32,18 +30,8 @@ export default function Screen({ commands, context = [], onBack, onCommand, chil
     const cmd = commands.find((c) => c.trigger === input);
     if (!cmd) return;
 
-    const result = cmd.execute(input) ?? {};
-
-    if (result.dialog !== undefined) {
-      setDialog(result.dialog(() => setDialog(null)));
-    }
-    if (result.nextScreen !== undefined) setScreen(result.nextScreen);
-    if (result.output !== undefined || result.nextScreen !== undefined || result.dialog !== undefined) {
-      onCommand?.(cmd, result);
-    }
+    cmd.onDispatch();
   });
-
-  const contextName = context[context.length - 1];
 
   return (
     <>
@@ -51,10 +39,9 @@ export default function Screen({ commands, context = [], onBack, onCommand, chil
       <ContextBar context={context} />
       <CommandPanel
         commands={commands}
-        contextName={contextName}
+        contextName={context[context.length - 1]}
         canGoBack={!!onBack || context.length > 0}
       />
-      {dialog}
     </>
   );
 }

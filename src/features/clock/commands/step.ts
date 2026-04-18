@@ -6,9 +6,6 @@ export function createStepCommand({ clock }: GameState): Command {
     trigger: "s",
     name: "Step",
     description: "Advance one tick",
-    execute() {
-      clock.pause();
-      clock.step();
-    },
+    onDispatch() { clock.pause(); clock.step(); },
   };
 }

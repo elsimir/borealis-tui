@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SearchDialog from "src/ui/search-dialog.js";
+import SearchDialog from "src/ui/components/search-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 
 interface SelectColonyDialogProps {

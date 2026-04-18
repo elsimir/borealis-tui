@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { GameClockListener } from "../engine/GameClock.js";
-import { useGameState } from "./game-state-context.js";
+import type { GameClockListener } from "../../engine/GameClock.js";
+import { useGameState } from "../components/game-state-context.js";
 
 export function useProductionCycle(): void {
   const { clock } = useGameState();

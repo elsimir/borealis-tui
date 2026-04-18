@@ -1,11 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Text } from "ink";
-import Screen from "src/ui/screen.js";
-import { useSetScreen } from "src/ui/screen-context.js";
-import { useGameState } from "src/ui/game-state-context.js";
-import { createSelectColonyCommand } from "../commands/select.js";
+import Screen from "src/ui/components/screen.js";
+import { useSetScreen } from "src/ui/components/screen-context.js";
+import { useGameState } from "src/ui/components/game-state-context.js";
+import { createSelectColonyCommand } from "../../commands/select.js";
 import { useSelectedColony } from "./selected-colony-context.js";
 import ColonyResourcesScreen from "./colony-resources-screen.js";
+import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { GameData } from "src/engine/GameData.js";
 
@@ -47,25 +48,38 @@ export default function ColonyDetailsScreen() {
   const { setScreen } = useSetScreen();
   const gameState = useGameState();
   const { colony, setColony } = useSelectedColony();
+  const [selectOpen, setSelectOpen] = useState(false);
+
+  const { world } = gameState;
+  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
 
   const commands = useMemo(() => [
     {
       trigger: "r",
       name: "Resources",
       description: "View planet resources and stockpile",
-      execute: () => ({ nextScreen: <ColonyResourcesScreen /> }),
+      onDispatch: () => setScreen(<ColonyResourcesScreen />),
     },
-    createSelectColonyCommand(gameState, setColony),
-  ], [setScreen, gameState, setColony]);
+    createSelectColonyCommand(() => setSelectOpen(true)),
+  ], [setScreen]);
 
   if (!colony) return null;
 
   return (
-    <Screen commands={commands} context={["Colonies", colony.name]}>
-      <Box gap={4}>
-        <ColonyInfo colony={colony} />
-        <InstallationList colony={colony} data={gameState.data} />
-      </Box>
-    </Screen>
+    <>
+      <Screen commands={commands} context={["Colonies", colony.name]}>
+        <Box gap={4}>
+          <ColonyInfo colony={colony} />
+          <InstallationList colony={colony} data={gameState.data} />
+        </Box>
+      </Screen>
+      {selectOpen && (
+        <SelectColonyDialog
+          colonies={colonies}
+          onDone={setColony}
+          onClose={() => setSelectOpen(false)}
+        />
+      )}
+    </>
   );
 }

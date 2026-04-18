@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Text } from "ink";
-import Screen from "src/ui/screen.js";
-import { useGameState } from "src/ui/game-state-context.js";
-import { useProductionCycle } from "src/ui/use-production-cycle.js";
-import { createSelectColonyCommand } from "../commands/select.js";
+import Screen from "src/ui/components/screen.js";
+import { useGameState } from "src/ui/components/game-state-context.js";
+import { useProductionCycle } from "src/ui/hooks/use-production-cycle.js";
+import { createSelectColonyCommand } from "../../commands/select.js";
 import { useSelectedColony } from "./selected-colony-context.js";
+import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { PlanetResources } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
@@ -116,18 +117,30 @@ export default function ColonyResourcesScreen() {
   const gameState = useGameState();
   const { world, data } = gameState;
   const { colony, setColony } = useSelectedColony();
+  const [selectOpen, setSelectOpen] = useState(false);
+
+  const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
   const planet = colony ? world.systems.getPlanet(colony.planetId) : undefined;
   const rows = colony ? buildRows(colony, planet?.resources ?? {}, data) : [];
 
   const commands = useMemo(() => [
-    createSelectColonyCommand(gameState, setColony),
-  ], [gameState, setColony]);
+    createSelectColonyCommand(() => setSelectOpen(true)),
+  ], []);
 
   if (!colony) return null;
 
   return (
-    <Screen commands={commands} context={["Colonies", colony.name, "Resources"]}>
-      <ResourceTable rows={rows} />
-    </Screen>
+    <>
+      <Screen commands={commands} context={["Colonies", colony.name, "Resources"]}>
+        <ResourceTable rows={rows} />
+      </Screen>
+      {selectOpen && (
+        <SelectColonyDialog
+          colonies={colonies}
+          onDone={setColony}
+          onClose={() => setSelectOpen(false)}
+        />
+      )}
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text } from "ink";
-import { useDimensions } from "./use-dimensions.js";
+import { useDimensions } from "../hooks/use-dimensions.js";
 
 const EVENTS_HEIGHT = 10;
 

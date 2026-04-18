@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Box, useApp, useInput } from "ink";
-import { GameState } from "../engine/GameState.js";
-import { GameData } from "../engine/GameData.js";
-import { Logger } from "../engine/Logger.js";
-import { useDimensions } from "./use-dimensions.js";
+import { GameState } from "../../engine/GameState.js";
+import { GameData } from "../../engine/GameData.js";
+import { Logger } from "../../engine/Logger.js";
+import { useDimensions } from "../hooks/use-dimensions.js";
 import StatusBar from "./status-bar.js";
 import MainScreen from "./main-screen.js";
 import EventsBox from "./events-box.js";
 import { ScreenContext } from "./screen-context.js";
 import { SharedInputProvider } from "./shared-input.js";
 import { GameStateContext } from "./game-state-context.js";
-import TimeControlDialog from "../features/clock/ui/time-control-dialog.js";
-import { SelectedColonyProvider } from "../features/colonies/ui/selected-colony-context.js";
+import TimeControlDialog from "../../features/clock/ui/components/time-control-dialog.js";
+import { SelectedColonyProvider } from "../../features/colonies/ui/components/selected-colony-context.js";
 
 export default function App({ data, logger }: { data: GameData; logger: Logger }) {
   const { exit } = useApp();

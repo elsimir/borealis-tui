@@ -1,13 +1,14 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Text } from "ink";
-import Screen from "src/ui/screen.js";
-import { useSetScreen } from "src/ui/screen-context.js";
-import { useGameState } from "src/ui/game-state-context.js";
+import Screen from "src/ui/components/screen.js";
+import { useSetScreen } from "src/ui/components/screen-context.js";
+import { useGameState } from "src/ui/components/game-state-context.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { GameWorld } from "src/engine/GameWorld.js";
-import { createSelectColonyCommand } from "../commands/select.js";
+import { createSelectColonyCommand } from "../../commands/select.js";
 import { useSelectedColony } from "./selected-colony-context.js";
 import ColonyDetailsScreen from "./colony-details-screen.js";
+import SelectColonyDialog from "./select-colony-dialog.js";
 
 function ColonyList({ world, colonies }: { world: GameWorld; colonies: Colony[] }) {
   if (colonies.length === 0) return <Text dimColor>No colonies.</Text>;
@@ -46,17 +47,27 @@ export default function ColoniesScreen() {
   const gameState = useGameState();
   const { setScreen } = useSetScreen();
   const { setColony } = useSelectedColony();
+  const [selectOpen, setSelectOpen] = useState(false);
 
   const commands = useMemo(() => [
-    createSelectColonyCommand(gameState, (colony) => { setColony(colony); setScreen(<ColonyDetailsScreen />); }),
-  ], [gameState, setScreen, setColony]);
+    createSelectColonyCommand(() => setSelectOpen(true)),
+  ], []);
 
   const { world } = gameState;
   const colonies = world.currentPlayerEmpireId ? world.colonies.forEmpire(world.currentPlayerEmpireId) : [];
 
   return (
-    <Screen commands={commands} context={["Colonies"]}>
-      <ColonyList world={world} colonies={colonies} />
-    </Screen>
+    <>
+      <Screen commands={commands} context={["Colonies"]}>
+        <ColonyList world={world} colonies={colonies} />
+      </Screen>
+      {selectOpen && (
+        <SelectColonyDialog
+          colonies={colonies}
+          onDone={(colony) => { setColony(colony); setScreen(<ColonyDetailsScreen />); }}
+          onClose={() => setSelectOpen(false)}
+        />
+      )}
+    </>
   );
 }

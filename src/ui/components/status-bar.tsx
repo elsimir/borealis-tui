@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text } from "ink";
-import Clock from "../features/clock/ui/clock.js";
-import SpeedDisplay from "../features/clock/ui/speed-display.js";
-import { type GameClockState } from "../engine/GameClock.js";
-import { interactionColor } from "./colors.js";
-import { useDimensions } from "./use-dimensions.js";
+import Clock from "../../features/clock/ui/components/clock.js";
+import SpeedDisplay from "../../features/clock/ui/components/speed-display.js";
+import { type GameClockState } from "../../engine/GameClock.js";
+import { interactionColor } from "../colors.js";
+import { useDimensions } from "../hooks/use-dimensions.js";
 import { useGameState } from "./game-state-context.js";
 
 function PauseControl() {

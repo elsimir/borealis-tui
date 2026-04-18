@@ -7,9 +7,7 @@ export function createSpeedUpCommand({ clock }: GameState): Command {
     trigger: "u",
     name: "Faster",
     description: "Increase clock speed",
-    execute() {
-      clock.setSpeed(GameSpeed.next(clock.getSpeed()));
-    },
+    onDispatch() { clock.setSpeed(GameSpeed.next(clock.getSpeed())); },
   };
 }
 
@@ -18,8 +16,6 @@ export function createSpeedDownCommand({ clock }: GameState): Command {
     trigger: "d",
     name: "Slower",
     description: "Decrease clock speed",
-    execute() {
-      clock.setSpeed(GameSpeed.previous(clock.getSpeed()));
-    },
+    onDispatch() { clock.setSpeed(GameSpeed.previous(clock.getSpeed())); },
   };
 }

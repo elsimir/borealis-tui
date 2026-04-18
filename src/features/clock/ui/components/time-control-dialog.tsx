@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useInput } from "ink";
-import Dialog from "src/ui/dialog.js";
-import { useGameState } from "src/ui/game-state-context.js";
+import Dialog from "src/ui/components/dialog.js";
+import { useGameState } from "src/ui/components/game-state-context.js";
 import { GameSpeed, type GameClockState } from "src/engine/GameClock.js";
 
 function Row({ keyHint, label }: { keyHint: string; label: string }) {

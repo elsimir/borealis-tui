@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useInput } from "ink";
-import type { Command } from "../commands/command.js";
-import { interactionColor } from "./colors.js";
-import { useDimensions } from "./use-dimensions.js";
+import type { Command } from "../../commands/command.js";
+import { interactionColor } from "../colors.js";
+import { useDimensions } from "../hooks/use-dimensions.js";
 
 interface Props {
   commands: Command[];

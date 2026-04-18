@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "ink";
-import App from "./ui/app.js";
+import App from "./ui/components/app.js";
 import { Logger } from "./engine/Logger.js";
 import { GameDataLoader } from "./data/GameDataLoader.js";
 

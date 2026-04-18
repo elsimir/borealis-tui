@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 import { Box } from "ink";
-import { useDimensions } from "./use-dimensions.js";
+import { useDimensions } from "../hooks/use-dimensions.js";
 
 interface OutputAreaProps {
   children?: ReactNode;
