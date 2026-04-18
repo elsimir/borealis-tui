@@ -29,7 +29,7 @@ function InstallationList({ colony, data }: { colony: Colony; data: GameData }) 
       <Text bold>Installations</Text>
       <Box flexDirection="column">
         {entries.map(([id, count]) => {
-          const inst = data.installations.find((i) => i.id === id);
+          const inst = data.installations.byId(id);
           return (
             <Text key={id}>
               <Text bold>{count}x </Text>

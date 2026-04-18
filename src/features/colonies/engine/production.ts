@@ -19,15 +19,14 @@ export function runColonyProduction(
   const delta: Record<string, number> = {};
 
   for (const [instId, count] of Object.entries(colony.installations)) {
-    const installation = data.installations.find((i) => i.id === instId);
+    const installation = data.installations.byId(instId);
     if (!installation) continue;
 
     for (const [outputId, outputPerYear] of Object.entries(installation.output)) {
       const outputPerStep = outputPerYear * STEP_FRACTION;
       if (outputId === "mining_points") {
         // mining_points drives mineral extraction per resource, not a direct stockpile output
-        for (const resource of data.resources) {
-          if (!resource.mineable) continue;
+        for (const resource of data.resources.mineable()) {
           const deposit = body.resources[resource.id];
           if (!deposit || deposit.accessibility <= 0) continue;
           delta[resource.id] = (delta[resource.id] ?? 0) + outputPerStep * count * deposit.accessibility;

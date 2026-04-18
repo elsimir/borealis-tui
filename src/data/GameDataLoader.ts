@@ -4,6 +4,8 @@ import { loadYaml, DataLoadError } from "./loader.js";
 import { ResourcesFileSchema } from "./schemas/resource.js";
 import { InstallationsFileSchema } from "./schemas/installation.js";
 import { GameData } from "../engine/GameData.js";
+import { ResourceCollection } from "./ResourceCollection.js";
+import { InstallationCollection } from "./InstallationCollection.js";
 import type { Logger } from "../engine/Logger.js";
 
 // In dev (bun run src/index.tsx), argv[1] is a real .tsx path — go up one level from src/.
@@ -25,7 +27,7 @@ export class GameDataLoader {
     ]);
     this.logger.info(`Loaded ${resources.length} resource(s), ${installations.length} installation(s)`);
 
-    return new GameData(resources, installations);
+    return new GameData(new ResourceCollection(resources), new InstallationCollection(installations));
   }
 
   private async loadFile<T>(type: string, path: string, schema: ZodType<T>): Promise<T> {

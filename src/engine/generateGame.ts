@@ -20,11 +20,11 @@ export function generateGame(data: GameData): GameWorld {
     name: "Earth",
     empireId: playerId,
     systemId: sol.id,
-    bodyId: sol.bodies[0].id,
+    bodyId: sol.bodyIds[0],
     population: 8_000_000_000,
     foundedAt: 0,
     installations: { mine: 3 },
-    stockpile: Object.fromEntries(resources.map((r) => [r.id, 1000])),
+    stockpile: Object.fromEntries(resources.all().map((r) => [r.id, 1000])),
     stockpileDelta: {},
   });
 
@@ -33,7 +33,7 @@ export function generateGame(data: GameData): GameWorld {
     name: "Mars",
     empireId: playerId,
     systemId: sol.id,
-    bodyId: sol.bodies[1].id,
+    bodyId: sol.bodyIds[1],
     population: 1_200_000,
     foundedAt: 0,
     installations: {},
@@ -47,10 +47,10 @@ export function generateGame(data: GameData): GameWorld {
 
   world.colonies.add({
     id: colonyId("nearby-colony"),
-    name: `${nearby.bodies[0].name} Colony`,
+    name: `${world.systems.getBody(nearby.bodyIds[0]).name} Colony`,
     empireId: playerId,
     systemId: nearby.id,
-    bodyId: nearby.bodies[0].id,
+    bodyId: nearby.bodyIds[0],
     population: 2_400_000,
     foundedAt: 0,
     installations: {},

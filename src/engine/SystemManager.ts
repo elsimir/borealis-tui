@@ -2,6 +2,7 @@ import type { Body, BodyId, BodyType, StarSystem, StarType, SystemId } from "./g
 import type { GameData } from "./GameData.js";
 import { bodyId, systemId } from "./gamedata/StarSystem.js";
 import { generateBodyResources } from "./generateBodyResources.js";
+import { Store } from "./Store.js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -28,31 +29,26 @@ export interface GenerateSystemParams {
 }
 
 export class SystemManager {
-  private systems = new Map<SystemId, StarSystem>();
+  private systems = new Store<StarSystem>("System");
+  private bodies = new Store<Body>("Body");
   private usedNames = new Set<string>();
 
   constructor(private data: GameData) {}
 
-  add(system: StarSystem): void {
-    this.systems.set(system.id, system);
-  }
-
   get(id: SystemId): StarSystem {
-    const system = this.systems.get(id);
-    if (!system) throw new Error(`System not found: ${id}`);
-    return system;
+    return this.systems.get(id);
   }
 
   all(): StarSystem[] {
-    return Array.from(this.systems.values());
+    return this.systems.all();
   }
 
   getBody(id: BodyId): Body {
-    for (const system of this.systems.values()) {
-      const body = system.bodies.find((b) => b.id === id);
-      if (body) return body;
-    }
-    throw new Error(`Body not found: ${id}`);
+    return this.bodies.get(id);
+  }
+
+  getBodiesForSystem(systemId: SystemId): Body[] {
+    return this.get(systemId).bodyIds.map((id) => this.getBody(id));
   }
 
   generate(params: GenerateSystemParams = {}): StarSystem {
@@ -81,9 +77,12 @@ export class SystemManager {
     connections: SystemId[],
     specs: BodySpec[],
   ): StarSystem {
-    const bodies = this.createBodies(id, name, specs);
-    const system: StarSystem = { id, name, starType, bodies, connections };
-    this.systems.set(id, system);
+    const bodyIds = this.createBodies(id, name, specs).map((body) => {
+      this.bodies.add(body);
+      return body.id;
+    });
+    const system: StarSystem = { id, name, starType, bodyIds, connections };
+    this.systems.add(system);
     return system;
   }
 
@@ -95,7 +94,7 @@ export class SystemManager {
         id: bodyId(`${sysId}-${letter.toLowerCase()}`),
         name: `${sysName} ${letter}`,
         bodyType: spec.bodyType,
-        resources: generateBodyResources(this.data.resources, spec.homeworld ?? false),
+        resources: generateBodyResources(this.data.resources.mineable(), spec.homeworld ?? false),
       };
     });
   }

@@ -32,6 +32,6 @@ export interface StarSystem {
   id: SystemId;
   name: string;
   starType: StarType;
-  bodies: Body[];
+  bodyIds: BodyId[];
   connections: SystemId[];
 }

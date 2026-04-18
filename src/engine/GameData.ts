@@ -1,9 +1,9 @@
-import type { Resource } from "../data/schemas/resource.js";
-import type { Installation } from "../data/schemas/installation.js";
+import type { ResourceCollection } from "../data/ResourceCollection.js";
+import type { InstallationCollection } from "../data/InstallationCollection.js";
 
 export class GameData {
   constructor(
-    readonly resources: readonly Resource[],
-    readonly installations: readonly Installation[],
+    readonly resources: ResourceCollection,
+    readonly installations: InstallationCollection,
   ) {}
 }

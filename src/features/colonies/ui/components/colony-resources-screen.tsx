@@ -15,10 +15,9 @@ function calcMiningPerYear(
   accessibility: number,
 ): number {
   let miningPointsPerYear = 0;
-  for (const [instId, count] of Object.entries(installations)) {
-    const inst = data.installations.find((i) => i.id === instId);
-    if (!inst) continue;
-    miningPointsPerYear += (inst.output["mining_points"] ?? 0) * count;
+  for (const inst of data.installations.miningInstallations()) {
+    const count = installations[inst.id] ?? 0;
+    miningPointsPerYear += inst.output["mining_points"]! * count;
   }
   return Math.round(miningPointsPerYear * accessibility);
 }
@@ -33,7 +32,7 @@ interface ResourceRow {
 }
 
 function buildRows(colony: Colony, bodyResources: BodyResources, data: GameData): ResourceRow[] {
-  return data.resources.filter((r) => r.mineable).map((resource) => {
+  return data.resources.mineable().map((resource) => {
     const deposit = bodyResources[resource.id] ?? { amount: 0, accessibility: 0 };
     return {
       name: resource.name,

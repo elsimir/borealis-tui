@@ -20,8 +20,6 @@ export function generateBodyResources(
   const result: BodyResources = {};
 
   for (const resource of resources) {
-    if (!resource.mineable) continue;
-
     if (!homeworld && Math.random() < ZERO_CHANCE) {
       result[resource.id] = { amount: 0, accessibility: 0 };
       continue;
