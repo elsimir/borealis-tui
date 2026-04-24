@@ -29,7 +29,7 @@ export class GameDataLoader {
     ]);
     this.logger.info(`Loaded ${resources.length} resource(s), ${installations.length} installation(s)`);
 
-    return new GameData(new ResourceCollection(resources), new InstallationCollection(installations), settings);
+    return GameData.instance = new GameData(new ResourceCollection(resources), new InstallationCollection(installations), settings);
   }
 
   private async loadFile<T>(type: string, path: string, schema: ZodType<T>): Promise<T> {

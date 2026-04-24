@@ -8,7 +8,7 @@ import { createSelectColonyCommand } from "../commands/select.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { Body } from "src/engine/gamedata/StarSystem.js";
-import type { GameData } from "src/engine/GameData.js";
+import { GameData } from "src/engine/GameData.js";
 import { predictYearlyMining } from "../../engine/production.js";
 
 function fmt(n: number): string { return n.toLocaleString(); }
@@ -27,9 +27,9 @@ interface ResourceRow {
   stockpileDelta: number;
 }
 
-function buildRows(colony: Colony, body: Body, data: GameData): ResourceRow[] {
-  const yearlyMining = predictYearlyMining(colony, body, data);
-  return data.resources.mineable().map((resource) => {
+function buildRows(colony: Colony, body: Body): ResourceRow[] {
+  const yearlyMining = predictYearlyMining(colony, body);
+  return GameData.instance.resources.mineable().map((resource) => {
     const deposit = body.resources[resource.id] ?? { amount: 0, accessibility: 0 };
     return {
       name: resource.name,
@@ -64,8 +64,8 @@ interface InstallationRow {
   totalMining: number;
 }
 
-function buildInstallationRows(colony: Colony, data: GameData): InstallationRow[] {
-  return data.installations.miningInstallations()
+function buildInstallationRows(colony: Colony): InstallationRow[] {
+  return GameData.instance.installations.miningInstallations()
     .filter((inst) => (colony.installations[inst.id] ?? 0) > 0)
     .map((inst) => {
       const count = colony.installations[inst.id];
@@ -95,13 +95,13 @@ interface Props {
 
 export default function ColonyResourcesScreen({ colony, setColony, onBack }: Props) {
   useProductionCycle();
-  const { world, data } = useGameState();
+  const { world } = useGameState();
   const [selectOpen, setSelectOpen] = useState(false);
 
   const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
   const body = world.systems.getBody(colony.bodyId);
-  const rows = buildRows(colony, body, data);
-  const installationRows = buildInstallationRows(colony, data);
+  const rows = buildRows(colony, body);
+  const installationRows = buildInstallationRows(colony);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),

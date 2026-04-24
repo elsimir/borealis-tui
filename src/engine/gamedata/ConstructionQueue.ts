@@ -1,5 +1,5 @@
 import type { Colony } from "./Colony.js";
-import type { GameData } from "../GameData.js";
+import { GameData } from "../GameData.js";
 
 export type ConstructionStatus =
   | { status: "Ok" }
@@ -44,14 +44,14 @@ export class ConstructionQueue {
     return this.items.length;
   }
 
-  applyPoints(data: GameData, buildPoints: number): ConstructionStatus {
+  applyPoints(buildPoints: number): ConstructionStatus {
     const { stockpile, installations } = this.colony;
     let remaining = buildPoints;
     let buildingCompleted = false;
 
     while (remaining > 0 && this.items.length > 0) {
       const item = this.items[0]!;
-      const installation = data.installations.byId(item.installationId);
+      const installation = GameData.instance.installations.byId(item.installationId);
       const costPerBuilding = installation?.cost.build_points ?? item.remainingCost;
 
       const pointsApplied = Math.min(remaining, item.remainingCost);

@@ -1,10 +1,9 @@
 import type { GameClockListener } from "src/engine/GameClock.js";
 import type { GameWorld } from "src/engine/GameWorld.js";
-import type { GameData } from "src/engine/GameData.js";
 import { runColonyConstruction, runColonyMining } from "./production.js";
 
 export class ColonyTickListener implements GameClockListener {
-  constructor(private world: GameWorld, private data: GameData) {}
+  constructor(private world: GameWorld) {}
 
   needsInterrupt(): null {
     return null;
@@ -17,8 +16,8 @@ export class ColonyTickListener implements GameClockListener {
       const body = this.world.systems.getBody(colony.bodyId);
 
       for (let i = 0; i < productionSteps; i++) {
-        runColonyMining(colony, body, this.data);
-        runColonyConstruction(colony, this.data);
+        runColonyMining(colony, body);
+        runColonyConstruction(colony);
       }
     }
   }

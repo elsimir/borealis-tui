@@ -1,7 +1,6 @@
 import type { Empire, EmpireId } from "src/engine/gamedata/Empire";
 import type { SystemId } from "src/engine/gamedata/StarSystem";
 import type { KnownSystem, SurveyLevel } from "src/engine/gamedata/KnownSystem";
-import type { GameData } from "./GameData.js";
 import { ColonyManager } from "./ColonyManager.js";
 import { EmpireManager } from "./EmpireManager.js";
 import { SystemManager } from "./SystemManager.js";
@@ -20,8 +19,8 @@ export class GameWorld {
   private currentPlayerEmpireId: EmpireId | null = null;
   private knownSystems = new Map<KnownSystemKey, KnownSystem>();
 
-  constructor(data: GameData) {
-    this.systems = new SystemManager(data);
+  constructor() {
+    this.systems = new SystemManager();
   }
 
   addPlayerEmpire(empire: Empire): void {

@@ -18,7 +18,7 @@ process.on("unhandledRejection", fatal);
 
 try {
   const gameData = await new GameDataLoader(logger).load();
-  render(<App data={gameData} logger={logger} />);
+  render(<App logger={logger} />);
 } catch (err) {
   fatal(err);
 }

@@ -7,7 +7,7 @@ import ColonyResourcesScreen from "./colony-resources-screen.js";
 import ColonyConstructionScreen from "./colony-construction-screen.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
-import type { GameData } from "src/engine/GameData.js";
+import { GameData } from "src/engine/GameData.js";
 
 function ColonyInfo({ colony }: { colony: Colony }) {
   return (
@@ -21,7 +21,7 @@ function ColonyInfo({ colony }: { colony: Colony }) {
   );
 }
 
-function InstallationList({ colony, data }: { colony: Colony; data: GameData }) {
+function InstallationList({ colony }: { colony: Colony }) {
   const entries = Object.entries(colony.installations);
   if (entries.length === 0) return <Text dimColor>No installations.</Text>;
 
@@ -30,7 +30,7 @@ function InstallationList({ colony, data }: { colony: Colony; data: GameData }) 
       <Text bold>Installations</Text>
       <Box flexDirection="column">
         {entries.map(([id, count]) => {
-          const inst = data.installations.byId(id);
+          const inst = GameData.instance.installations.byId(id);
           return (
             <Text key={id}>
               <Text bold>{count}x </Text>
@@ -99,7 +99,7 @@ export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props
       <Screen commands={commands} context={["Colonies", colony.name]} onBack={onBack}>
         <Box gap={4}>
           <ColonyInfo colony={colony} />
-          <InstallationList colony={colony} data={gameState.data} />
+          <InstallationList colony={colony} />
         </Box>
       </Screen>
       {selectOpen && (

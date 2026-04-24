@@ -8,7 +8,7 @@ import { createSelectColonyCommand } from "../commands/select.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import BuildInstallationDialog from "./build-installation-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
-import type { GameData } from "src/engine/GameData.js";
+import { GameData } from "src/engine/GameData.js";
 
 function fmt(n: number): string { return Math.round(n).toLocaleString(); }
 
@@ -21,9 +21,9 @@ interface QueueRow {
   totalCost: number;
 }
 
-function buildQueueRows(colony: Colony, data: GameData): QueueRow[] {
+function buildQueueRows(colony: Colony): QueueRow[] {
   return colony.constructionQueue.all().map((item, index) => {
-    const installation = data.installations.byId(item.installationId);
+    const installation = GameData.instance.installations.byId(item.installationId);
     const costPerBuilding = installation?.cost.build_points ?? item.remainingCost;
     return {
       position: index + 1,
@@ -52,8 +52,8 @@ interface InstallationRow {
   totalBuild: number;
 }
 
-function buildInstallationRows(colony: Colony, data: GameData): InstallationRow[] {
-  return data.installations.constructionInstallations()
+function buildInstallationRows(colony: Colony): InstallationRow[] {
+  return GameData.instance.installations.constructionInstallations()
     .filter((inst) => (colony.installations[inst.id] ?? 0) > 0)
     .map((inst) => {
       const count = colony.installations[inst.id];
@@ -84,13 +84,13 @@ interface Props {
 export default function ColonyConstructionScreen({ colony, setColony, onBack }: Props) {
   const [, forceUpdate] = useState(0);
   useProductionCycle();
-  const { world, data } = useGameState();
+  const { world } = useGameState();
   const [selectOpen, setSelectOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
 
   const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
-  const queueRows = buildQueueRows(colony, data);
-  const installationRows = buildInstallationRows(colony, data);
+  const queueRows = buildQueueRows(colony);
+  const installationRows = buildInstallationRows(colony);
 
   function handleBuildConfirmed(installation: { id: string; cost: { build_points: number } }, count: number) {
     colony.constructionQueue.add(installation.id, count, installation.cost.build_points);
@@ -121,7 +121,7 @@ export default function ColonyConstructionScreen({ colony, setColony, onBack }: 
       </Screen>
       {newOpen && (
         <BuildInstallationDialog
-          installations={data.installations.all()}
+          installations={GameData.instance.installations.all()}
           onDone={handleBuildConfirmed}
           onClose={() => setNewOpen(false)}
         />

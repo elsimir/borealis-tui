@@ -1,11 +1,11 @@
 import { GameWorld } from "src/engine/GameWorld.js";
 import { Empire, empireId } from "src/engine/gamedata/Empire.js";
 import { colonyId } from "src/engine/gamedata/Colony.js";
-import type { GameData } from "src/engine/GameData.js";
+import { GameData } from "src/engine/GameData.js";
 
-export function generateGame(data: GameData): GameWorld {
-  const world = new GameWorld(data);
-  const { resources } = data;
+export function generateGame(): GameWorld {
+  const world = new GameWorld();
+  const { resources, settings } = GameData.instance;
 
   const playerEmpire = new Empire(empireId("player"), "Player Empire", "#00AAFF");
   world.addPlayerEmpire(playerEmpire);
@@ -23,7 +23,7 @@ export function generateGame(data: GameData): GameWorld {
     bodyId: sol.bodyIds[0],
     population: 8_000_000_000,
     foundedAt: 0,
-    installations: data.settings.game_setup.profiles["default"].installations,
+    installations: settings.game_setup.profiles["default"].installations,
     stockpile: Object.fromEntries(resources.all().map((r) => [r.id, 1000])),
   });
 

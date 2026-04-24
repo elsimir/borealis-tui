@@ -1,5 +1,5 @@
 import type { Body, BodyId, BodyType, StarSystem, StarType, SystemId } from "./gamedata/StarSystem.js";
-import type { GameData } from "./GameData.js";
+import { GameData } from "./GameData.js";
 import { bodyId, systemId } from "./gamedata/StarSystem.js";
 import { generateBodyResources } from "./generateBodyResources.js";
 import { Store } from "./Store.js";
@@ -33,7 +33,7 @@ export class SystemManager {
   private bodies = new Store<Body>("Body");
   private usedNames = new Set<string>();
 
-  constructor(private data: GameData) {}
+  constructor() {}
 
   get(id: SystemId): StarSystem {
     return this.systems.get(id);
@@ -94,7 +94,7 @@ export class SystemManager {
         id: bodyId(`${sysId}-${letter.toLowerCase()}`),
         name: `${sysName} ${letter}`,
         bodyType: spec.bodyType,
-        resources: generateBodyResources(this.data.resources.mineable(), spec.homeworld ?? false),
+        resources: generateBodyResources(GameData.instance.resources.mineable(), spec.homeworld ?? false),
       };
     });
   }

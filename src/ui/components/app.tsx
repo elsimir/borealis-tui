@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, useApp, useInput } from "ink";
 import { GameState } from "../../engine/GameState.js";
-import { GameData } from "../../engine/GameData.js";
 import { Logger } from "../../engine/Logger.js";
 import { useDimensions } from "../hooks/use-dimensions.js";
 import StatusBar from "./status-bar.js";
@@ -11,11 +10,11 @@ import { SharedInputProvider } from "./shared-input.js";
 import { GameStateContext } from "./game-state-context.js";
 import TimeControlDialog from "../../features/clock/ui/components/time-control-dialog.js";
 
-export default function App({ data, logger }: { data: GameData; logger: Logger }) {
+export default function App({ logger }: { logger: Logger }) {
   const { exit } = useApp();
   const { columns, rows } = useDimensions();
 
-  const gameState = useMemo(() => new GameState(data, logger), [data, logger]);
+  const gameState = useMemo(() => new GameState(logger), [logger]);
 
   useEffect(() => {
     gameState.clock.start();

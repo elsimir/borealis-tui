@@ -1,6 +1,6 @@
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { Body } from "src/engine/gamedata/StarSystem.js";
-import type { GameData } from "src/engine/GameData.js";
+import { GameData } from "src/engine/GameData.js";
 import { isConstructionInstallation, isMiningInstallation } from "src/data/InstallationCollection.js";
 import type { ConstructionStatus } from "src/engine/gamedata/ConstructionQueue.js";
 
@@ -10,21 +10,17 @@ const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
 
 export type MiningResult = Record<string, number>;
 
-export function computeColonyMining(
-  colony: Colony,
-  body: Body,
-  data: GameData,
-): MiningResult {
-  const stepFraction = data.settings.production_step / SECONDS_PER_YEAR;
+export function computeColonyMining(colony: Colony, body: Body): MiningResult {
+  const stepFraction = GameData.instance.settings.production_step / SECONDS_PER_YEAR;
   const result: MiningResult = {};
 
   for (const [instId, count] of Object.entries(colony.installations)) {
-    const installation = data.installations.byId(instId);
+    const installation = GameData.instance.installations.byId(instId);
     if (!installation) continue;
 
     if (isMiningInstallation(installation)) {
       const outputPerStep = installation.output["mining_points"] * stepFraction;
-      for (const resource of data.resources.mineable()) {
+      for (const resource of GameData.instance.resources.mineable()) {
         const deposit = body.resources[resource.id];
         if (!deposit || deposit.accessibility <= 0 || deposit.amount <= 0) continue;
         const mined = Math.min(outputPerStep * count * deposit.accessibility, deposit.amount);
@@ -40,16 +36,16 @@ export function computeColonyMining(
   return result;
 }
 
-export function predictYearlyMining(colony: Colony, body: Body, data: GameData): Record<string, number> {
-  const stepsPerYear = SECONDS_PER_YEAR / data.settings.production_step;
-  const result = computeColonyMining(colony, body, data);
+export function predictYearlyMining(colony: Colony, body: Body): Record<string, number> {
+  const stepsPerYear = SECONDS_PER_YEAR / GameData.instance.settings.production_step;
+  const result = computeColonyMining(colony, body);
   return Object.fromEntries(
     Object.entries(result).map(([id, perStep]) => [id, Math.round(perStep * stepsPerYear)])
   );
 }
 
-export function runColonyMining(colony: Colony, body: Body, data: GameData): void {
-  applyMiningResult(colony, body, computeColonyMining(colony, body, data));
+export function runColonyMining(colony: Colony, body: Body): void {
+  applyMiningResult(colony, body, computeColonyMining(colony, body));
 }
 
 export function applyMiningResult(colony: Colony, body: Body, result: MiningResult): void {
@@ -62,12 +58,12 @@ export function applyMiningResult(colony: Colony, body: Body, result: MiningResu
   }
 }
 
-export function computeColonyConstruction(colony: Colony, data: GameData): number {
-  const stepFraction = data.settings.production_step / SECONDS_PER_YEAR;
+export function computeColonyConstruction(colony: Colony): number {
+  const stepFraction = GameData.instance.settings.production_step / SECONDS_PER_YEAR;
   let buildPoints = 0;
 
   for (const [instId, count] of Object.entries(colony.installations)) {
-    const installation = data.installations.byId(instId);
+    const installation = GameData.instance.installations.byId(instId);
     if (!installation) continue;
     if (isConstructionInstallation(installation)) {
       buildPoints += installation.output["build_points"] * stepFraction * count;
@@ -77,11 +73,11 @@ export function computeColonyConstruction(colony: Colony, data: GameData): numbe
   return buildPoints;
 }
 
-export function runColonyConstruction(colony: Colony, data: GameData): ConstructionStatus {
-  const buildPoints = computeColonyConstruction(colony, data);
+export function runColonyConstruction(colony: Colony): ConstructionStatus {
+  const buildPoints = computeColonyConstruction(colony);
 
   if (buildPoints === 0) return { status: "Ok" };
   if (colony.constructionQueue.length === 0) return { status: "QueueEmpty" };
 
-  return colony.constructionQueue.applyPoints(data, buildPoints);
+  return colony.constructionQueue.applyPoints(buildPoints);
 }
