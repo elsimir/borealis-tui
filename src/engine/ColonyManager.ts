@@ -1,13 +1,22 @@
 import type { Colony, ColonyId } from "./gamedata/Colony.js";
 import type { EmpireId } from "./gamedata/Empire.js";
+import { ConstructionQueue } from "./gamedata/ConstructionQueue.js";
 import { Store } from "./Store.js";
+
+type ColonyInit = Omit<Colony, "stockpileDelta" | "constructionQueue">;
 
 export class ColonyManager {
   private colonies = new Store<Colony>("Colony");
   private byEmpire = new Map<EmpireId, ColonyId[]>();
 
-  add(colony: Colony): void {
-    this.colonies.add(colony);
+  add(colony: ColonyInit): void {
+    const full: Colony = {
+      ...colony,
+      stockpileDelta: {},
+      constructionQueue: null!,
+    };
+    full.constructionQueue = new ConstructionQueue(full);
+    this.colonies.add(full);
     const ids = this.byEmpire.get(colony.empireId) ?? [];
     ids.push(colony.id);
     this.byEmpire.set(colony.empireId, ids);

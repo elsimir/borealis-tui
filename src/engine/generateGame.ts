@@ -25,7 +25,6 @@ export function generateGame(data: GameData): GameWorld {
     foundedAt: 0,
     installations: data.settings.game_setup.profiles["default"].installations,
     stockpile: Object.fromEntries(resources.all().map((r) => [r.id, 1000])),
-    stockpileDelta: {},
   });
 
   world.colonies.add({
@@ -38,7 +37,6 @@ export function generateGame(data: GameData): GameWorld {
     foundedAt: 0,
     installations: {},
     stockpile: {},
-    stockpileDelta: {},
   });
 
   const nearby = world.systems.generate({ connections: [sol.id] });
@@ -55,7 +53,6 @@ export function generateGame(data: GameData): GameWorld {
     foundedAt: 0,
     installations: {},
     stockpile: {},
-    stockpileDelta: {},
   });
 
   return world;

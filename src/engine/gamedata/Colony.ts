@@ -1,5 +1,6 @@
 import type { EmpireId } from "./Empire.js";
 import type { BodyId, SystemId } from "./StarSystem.js";
+import type { ConstructionQueue } from "./ConstructionQueue.js";
 
 export type ColonyId = string & { readonly _brand: "ColonyId" };
 
@@ -20,4 +21,5 @@ export interface Colony {
   installations: Record<string, number>;
   stockpile: ResourceStockpile;
   stockpileDelta: ResourceStockpile;
+  constructionQueue: ConstructionQueue;
 }

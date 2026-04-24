@@ -4,6 +4,7 @@ import Screen from "src/ui/components/screen.js";
 import { useGameState } from "src/ui/components/game-state-context.js";
 import { createSelectColonyCommand } from "../commands/select.js";
 import ColonyResourcesScreen from "./colony-resources-screen.js";
+import ColonyConstructionScreen from "./colony-construction-screen.js";
 import SelectColonyDialog from "./select-colony-dialog.js";
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { GameData } from "src/engine/GameData.js";
@@ -51,6 +52,7 @@ interface Props {
 export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props) {
   const gameState = useGameState();
   const [showResources, setShowResources] = useState(false);
+  const [showConstruction, setShowConstruction] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
 
   const { world } = gameState;
@@ -63,6 +65,12 @@ export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props
       description: "View body resources and stockpile",
       onDispatch: () => setShowResources(true),
     },
+    {
+      trigger: "c",
+      name: "Construction",
+      description: "View construction queue",
+      onDispatch: () => setShowConstruction(true),
+    },
     createSelectColonyCommand(() => setSelectOpen(true)),
   ], []);
 
@@ -72,6 +80,16 @@ export default function ColonyDetailsScreen({ colony, setColony, onBack }: Props
         colony={colony}
         setColony={setColony}
         onBack={() => setShowResources(false)}
+      />
+    );
+  }
+
+  if (showConstruction) {
+    return (
+      <ColonyConstructionScreen
+        colony={colony}
+        setColony={setColony}
+        onBack={() => setShowConstruction(false)}
       />
     );
   }

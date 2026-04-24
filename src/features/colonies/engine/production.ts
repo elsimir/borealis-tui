@@ -1,7 +1,10 @@
 import type { Colony } from "src/engine/gamedata/Colony.js";
 import type { Body } from "src/engine/gamedata/StarSystem.js";
 import type { GameData } from "src/engine/GameData.js";
-import { isMiningInstallation } from "src/data/InstallationCollection.js";
+import { isConstructionInstallation, isMiningInstallation } from "src/data/InstallationCollection.js";
+import type { ConstructionStatus } from "src/engine/gamedata/ConstructionQueue.js";
+
+export type { ConstructionStatus };
 
 const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
 
@@ -57,4 +60,28 @@ export function applyMiningResult(colony: Colony, body: Body, result: MiningResu
     const deposit = body.resources[resourceId];
     if (deposit) deposit.amount -= amount;
   }
+}
+
+export function computeColonyConstruction(colony: Colony, data: GameData): number {
+  const stepFraction = data.settings.production_step / SECONDS_PER_YEAR;
+  let buildPoints = 0;
+
+  for (const [instId, count] of Object.entries(colony.installations)) {
+    const installation = data.installations.byId(instId);
+    if (!installation) continue;
+    if (isConstructionInstallation(installation)) {
+      buildPoints += installation.output["build_points"] * stepFraction * count;
+    }
+  }
+
+  return buildPoints;
+}
+
+export function runColonyConstruction(colony: Colony, data: GameData): ConstructionStatus {
+  const buildPoints = computeColonyConstruction(colony, data);
+
+  if (buildPoints === 0) return { status: "Ok" };
+  if (colony.constructionQueue.length === 0) return { status: "QueueEmpty" };
+
+  return colony.constructionQueue.applyPoints(data, buildPoints);
 }
