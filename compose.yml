@@ -1,0 +1,8 @@
+services:
+  borealis:
+    build: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - ./logs:/root/.local/share/borealis/logs
