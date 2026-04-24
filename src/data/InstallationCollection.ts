@@ -1,5 +1,9 @@
 import type { Installation } from "./schemas/installation.js";
 
+export function isMiningInstallation(installation: Installation): boolean {
+  return "mining_points" in installation.output;
+}
+
 export class InstallationCollection {
   private _index?: Map<string, Installation>;
   private _mining?: readonly Installation[];
@@ -9,7 +13,7 @@ export class InstallationCollection {
   all(): readonly Installation[] { return this.items; }
 
   miningInstallations(): readonly Installation[] {
-    if (!this._mining) this._mining = this.items.filter((i) => "mining_points" in i.output);
+    if (!this._mining) this._mining = this.items.filter(isMiningInstallation);
     return this._mining;
   }
 

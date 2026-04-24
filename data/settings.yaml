@@ -1,0 +1,8 @@
+production_step: 432000  # 5 game-days in seconds
+
+game_setup:
+  profiles:
+    default:
+      installations:
+        - mine: 50
+        - factory: 100

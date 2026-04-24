@@ -23,7 +23,7 @@ export function generateGame(data: GameData): GameWorld {
     bodyId: sol.bodyIds[0],
     population: 8_000_000_000,
     foundedAt: 0,
-    installations: { mine: 3 },
+    installations: data.settings.game_setup.profiles["default"].installations,
     stockpile: Object.fromEntries(resources.all().map((r) => [r.id, 1000])),
     stockpileDelta: {},
   });

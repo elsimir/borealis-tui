@@ -15,7 +15,7 @@ export class GameState {
     this.logger = logger;
     this.data = data;
     this.world = generateGame(data);
-    this.clock = new GameClock(GameSpeed.OneDay);
+    this.clock = new GameClock(GameSpeed.OneDay, data.settings.production_step);
     this.clock.addListener(new ColonyTickListener(this.world, this.data));
     this.logger.info("GameState initialized");
   }

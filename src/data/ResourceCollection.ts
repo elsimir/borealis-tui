@@ -1,5 +1,9 @@
 import type { Resource } from "./schemas/resource.js";
 
+export function isMineable(resource: Resource): boolean {
+  return resource.mineable === true;
+}
+
 export class ResourceCollection {
   private _mineable?: readonly Resource[];
 
@@ -8,7 +12,7 @@ export class ResourceCollection {
   all(): readonly Resource[] { return this.items; }
 
   mineable(): readonly Resource[] {
-    if (!this._mineable) this._mineable = this.items.filter((r) => r.mineable);
+    if (!this._mineable) this._mineable = this.items.filter(isMineable);
     return this._mineable;
   }
 }

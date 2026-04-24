@@ -1,6 +1,3 @@
-/** In-game seconds per production step (5 game-days). */
-export const PRODUCTION_STEP_SECONDS = 5 * 24 * 60 * 60;
-
 /**
  * Returned by `needsInterrupt` to request that a tick be cut short at `time`.
  *
@@ -23,7 +20,7 @@ export interface Interrupt {
  * `execute` is then called on every listener with the final executeTime.
  *
  * `productionSteps` is the number of full production steps (each =
- * PRODUCTION_STEP_SECONDS) that completed in this tick based on accumulated
+ * this.productionStepSeconds) that completed in this tick based on accumulated
  * game time since the last step. For `needsInterrupt` it is computed from the
  * full tick; for `execute` it reflects the actual (possibly clamped) elapsed
  * time.
@@ -103,7 +100,10 @@ export class GameClock {
   private listeners: Set<GameClockListener> = new Set();
   private stateListeners: Set<(state: GameClockState, speed: GameSpeedOption) => void> = new Set();
 
-  constructor(speed: GameSpeedOption = GameSpeed.OneDay) {
+  constructor(
+    speed: GameSpeedOption = GameSpeed.OneDay,
+    private readonly productionStepSeconds: number = 5 * 24 * 60 * 60,
+  ) {
     this.speed = speed;
   }
 
@@ -175,7 +175,7 @@ export class GameClock {
       const remaining = target - prevElapsed;
 
       const speculativeSteps = Math.floor(
-        (this.secondsSinceLastProduction + remaining) / PRODUCTION_STEP_SECONDS,
+        (this.secondsSinceLastProduction + remaining) / this.productionStepSeconds,
       );
 
       let interrupt: Interrupt | null = null;
@@ -190,8 +190,8 @@ export class GameClock {
 
       const tickSeconds = executeTime - prevElapsed;
       this.secondsSinceLastProduction += tickSeconds;
-      const productionSteps = Math.floor(this.secondsSinceLastProduction / PRODUCTION_STEP_SECONDS);
-      this.secondsSinceLastProduction -= productionSteps * PRODUCTION_STEP_SECONDS;
+      const productionSteps = Math.floor(this.secondsSinceLastProduction / this.productionStepSeconds);
+      this.secondsSinceLastProduction -= productionSteps * this.productionStepSeconds;
 
       this.elapsedSeconds = executeTime;
 

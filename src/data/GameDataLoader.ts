@@ -3,6 +3,7 @@ import type { ZodType } from "zod";
 import { loadYaml, DataLoadError } from "./loader.js";
 import { ResourcesFileSchema } from "./schemas/resource.js";
 import { InstallationsFileSchema } from "./schemas/installation.js";
+import { SettingsFileSchema } from "./schemas/settings.js";
 import { GameData } from "../engine/GameData.js";
 import { ResourceCollection } from "./ResourceCollection.js";
 import { InstallationCollection } from "./InstallationCollection.js";
@@ -21,13 +22,14 @@ export class GameDataLoader {
   constructor(private readonly logger: Logger) {}
 
   async load(): Promise<GameData> {
-    const [resources, installations] = await Promise.all([
+    const [resources, installations, settings] = await Promise.all([
       this.loadFile("resources", resolve(dataDir, "resources.yaml"), ResourcesFileSchema),
       this.loadFile("installations", resolve(dataDir, "installations.yaml"), InstallationsFileSchema),
+      this.loadFile("settings", resolve(dataDir, "settings.yaml"), SettingsFileSchema),
     ]);
     this.logger.info(`Loaded ${resources.length} resource(s), ${installations.length} installation(s)`);
 
-    return new GameData(new ResourceCollection(resources), new InstallationCollection(installations));
+    return new GameData(new ResourceCollection(resources), new InstallationCollection(installations), settings);
   }
 
   private async loadFile<T>(type: string, path: string, schema: ZodType<T>): Promise<T> {
