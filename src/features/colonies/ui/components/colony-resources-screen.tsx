@@ -56,10 +56,10 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
     <Box flexDirection="column">
       <Box>
         <Text bold>{pad("Resource", colWidths.name)}</Text>
-        <Text bold>{padL("Body Amt", colWidths.amount)}</Text>
+        <Text bold>{padL("Deposit", colWidths.amount)}</Text>
         <Text bold>{padL("Access", colWidths.access)}</Text>
-        <Text bold>{padL("Mining/yr", colWidths.mining)}</Text>
-        <Text bold>{padL("Stockpile", colWidths.stockpile)}</Text>
+        <Text bold>{padL("Mine/yr", colWidths.mining)}</Text>
+        <Text bold>{padL("Stock", colWidths.stockpile)}</Text>
         <Text bold>{padL("Δ/tick", colWidths.delta)}</Text>
       </Box>
       <Text dimColor>{"─".repeat(
@@ -84,6 +84,61 @@ function ResourceTable({ rows }: { rows: ResourceRow[] }) {
   );
 }
 
+interface InstallationRow {
+  name: string;
+  count: number;
+  miningPerInstallation: number;
+  totalMining: number;
+}
+
+function buildInstallationRows(colony: Colony, data: GameData): InstallationRow[] {
+  return data.installations.miningInstallations()
+    .filter((inst) => (colony.installations[inst.id] ?? 0) > 0)
+    .map((inst) => {
+      const count = colony.installations[inst.id];
+      const miningPerInstallation = inst.output["mining_points"];
+      return { name: inst.name, count, miningPerInstallation, totalMining: miningPerInstallation * count };
+    });
+}
+
+function InstallationTable({ rows }: { rows: InstallationRow[] }) {
+  const colWidths = { name: 20, count: 8, perInst: 14, total: 14 };
+
+  function pad(s: string, w: number): string {
+    return s.length >= w ? s.slice(0, w) : s + " ".repeat(w - s.length);
+  }
+
+  function padL(s: string, w: number): string {
+    return s.length >= w ? s.slice(0, w) : " ".repeat(w - s.length) + s;
+  }
+
+  return (
+    <Box flexDirection="column">
+      <Box>
+        <Text bold>{pad("Installation", colWidths.name)}</Text>
+        <Text bold>{padL("#", colWidths.count)}</Text>
+        <Text bold>{padL("Per year", colWidths.perInst)}</Text>
+        <Text bold>{padL("Total/yr", colWidths.total)}</Text>
+      </Box>
+      <Text dimColor>{"─".repeat(colWidths.name + colWidths.count + colWidths.perInst + colWidths.total)}</Text>
+      {rows.length === 0 ? (
+        <Text dimColor>No mining installations</Text>
+      ) : rows.map((row) => (
+        <Box key={row.name}>
+          <Text>{pad(row.name, colWidths.name)}</Text>
+          <Text>{padL(String(row.count), colWidths.count)}</Text>
+          <Text color={row.miningPerInstallation > 0 ? "green" : undefined}>
+            {padL(row.miningPerInstallation > 0 ? fmt(row.miningPerInstallation) : "—", colWidths.perInst)}
+          </Text>
+          <Text color={row.totalMining > 0 ? "green" : undefined}>
+            {padL(row.totalMining > 0 ? fmt(row.totalMining) : "—", colWidths.total)}
+          </Text>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
 interface Props {
   colony: Colony;
   setColony: (colony: Colony) => void;
@@ -98,6 +153,7 @@ export default function ColonyResourcesScreen({ colony, setColony, onBack }: Pro
   const colonies = world.colonies.forEmpire(world.getCurrentPlayerEmpire().id);
   const body = world.systems.getBody(colony.bodyId);
   const rows = buildRows(colony, body, data);
+  const installationRows = buildInstallationRows(colony, data);
 
   const commands = useMemo(() => [
     createSelectColonyCommand(() => setSelectOpen(true)),
@@ -106,7 +162,10 @@ export default function ColonyResourcesScreen({ colony, setColony, onBack }: Pro
   return (
     <>
       <Screen commands={commands} context={["Colonies", colony.name, "Resources"]} onBack={onBack}>
-        <ResourceTable rows={rows} />
+        <Box flexDirection="column" gap={1}>
+          <ResourceTable rows={rows} />
+          <InstallationTable rows={installationRows} />
+        </Box>
       </Screen>
       {selectOpen && (
         <SelectColonyDialog

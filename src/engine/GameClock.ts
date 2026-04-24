@@ -2,20 +2,34 @@
 export const PRODUCTION_STEP_SECONDS = 5 * 24 * 60 * 60;
 
 /**
+ * Returned by `needsInterrupt` to request that a tick be cut short at `time`.
+ *
+ * - `soft` — clamp the tick to `time` and continue running; the remaining
+ *   in-game time is deferred to the next real-time tick.
+ * - `hard` — clamp the tick to `time` and pause the clock after executing,
+ *   leaving the game stopped at exactly that moment.
+ */
+export interface Interrupt {
+  time: number;
+  kind: "soft" | "hard";
+}
+
+/**
  * A listener registered with the GameClock.
  *
- * Each tick, `needsInterrupt` is called first across all listeners. If any returns a
- * non-null value, the smallest returned value becomes the executeTime for that
- * tick (clamping it earlier than the full tick). `execute` is then called on
- * every listener with the final executeTime.
+ * Each tick, `needsInterrupt` is called first across all listeners. If any
+ * returns a non-null value, the earliest time wins and its `kind` determines
+ * whether the clock continues (`soft`) or pauses (`hard`) after executing.
+ * `execute` is then called on every listener with the final executeTime.
  *
- * `productionSteps` is the number of full production steps (each = PRODUCTION_STEP_SECONDS)
- * that completed in this tick based on accumulated game time since the last step.
- * For `needsInterrupt` it is computed from the full tick; for `execute` it reflects
- * the actual (possibly clamped) elapsed time.
+ * `productionSteps` is the number of full production steps (each =
+ * PRODUCTION_STEP_SECONDS) that completed in this tick based on accumulated
+ * game time since the last step. For `needsInterrupt` it is computed from the
+ * full tick; for `execute` it reflects the actual (possibly clamped) elapsed
+ * time.
  */
 export interface GameClockListener {
-  needsInterrupt(elapsedSeconds: number, speed: GameSpeedOption, productionSteps: number): number | null;
+  needsInterrupt(elapsedSeconds: number, speed: GameSpeedOption, productionSteps: number): Interrupt | null;
   execute(elapsedSeconds: number, productionSteps: number): void;
 }
 
@@ -154,26 +168,41 @@ export class GameClock {
   }
 
   private advance(): void {
-    const prevElapsed = this.elapsedSeconds;
-    this.elapsedSeconds += this.speed;
+    const target = this.elapsedSeconds + this.speed;
 
-    const speculativeSteps = Math.floor(
-      (this.secondsSinceLastProduction + this.speed) / PRODUCTION_STEP_SECONDS,
-    );
+    while (this.elapsedSeconds < target) {
+      const prevElapsed = this.elapsedSeconds;
+      const remaining = target - prevElapsed;
 
-    let executeTime = this.elapsedSeconds;
-    for (const listener of this.listeners) {
-      const eventAt = listener.needsInterrupt(this.elapsedSeconds, this.speed, speculativeSteps);
-      if (eventAt !== null && eventAt < executeTime) executeTime = eventAt;
-    }
+      const speculativeSteps = Math.floor(
+        (this.secondsSinceLastProduction + remaining) / PRODUCTION_STEP_SECONDS,
+      );
 
-    const tickSeconds = executeTime - prevElapsed;
-    this.secondsSinceLastProduction += tickSeconds;
-    const productionSteps = Math.floor(this.secondsSinceLastProduction / PRODUCTION_STEP_SECONDS);
-    this.secondsSinceLastProduction -= productionSteps * PRODUCTION_STEP_SECONDS;
+      let interrupt: Interrupt | null = null;
+      for (const listener of this.listeners) {
+        const candidate = listener.needsInterrupt(target, this.speed, speculativeSteps);
+        if (candidate !== null && (interrupt === null || candidate.time < interrupt.time)) {
+          interrupt = candidate;
+        }
+      }
 
-    for (const listener of this.listeners) {
-      listener.execute(executeTime, productionSteps);
+      const executeTime = interrupt !== null ? Math.min(interrupt.time, target) : target;
+
+      const tickSeconds = executeTime - prevElapsed;
+      this.secondsSinceLastProduction += tickSeconds;
+      const productionSteps = Math.floor(this.secondsSinceLastProduction / PRODUCTION_STEP_SECONDS);
+      this.secondsSinceLastProduction -= productionSteps * PRODUCTION_STEP_SECONDS;
+
+      this.elapsedSeconds = executeTime;
+
+      for (const listener of this.listeners) {
+        listener.execute(executeTime, productionSteps);
+      }
+
+      if (interrupt?.kind === "hard") {
+        this.pause();
+        return;
+      }
     }
   }
 
